@@ -464,7 +464,7 @@ async def start(bot, m: Message):
     user_name = m.sender_chat.title if m.chat.type == "channel" else m.from_user.first_name
     start_message = await bot.send_message(
         m.chat.id,
-        f">🤍 Welcome {user_name}! 💞\n\n"
+        f">Hey 👑 {user_name}! 💞\n\n"
     )
 
     await asyncio.sleep(1)
@@ -476,14 +476,14 @@ async def start(bot, m: Message):
 
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f">🦋 Welcome {user_name}! \n\n" +
+        f">🦋 Welcome {user_name}! 🦋\n\n" +
         f"Loading features... ⏳\n\n"
         f"Progress:\n ❤️❤️❤️🤍🤍🤍🤍🤍🤍🤍 25%\n\n"
     )
     
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f"> Welcome {user_name}! \n\n" +
+        f"> 🦋 Welcome {user_name}! 🦋\n\n" +
         f"This may take a moment 😉\n\n"
         f"Progress:\n 🧡🧡🧡🧡🧡🤍🤍🤍🤍🤍 50%\n\n"
     )
