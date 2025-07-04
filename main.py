@@ -39,16 +39,26 @@ import zipfile
 import shutil
 import ffmpeg
 
-import unicodedata
 
+def clean_filename(raw_title: str, url: str) -> str:
+    # Remove unsafe filesystem characters but keep emojis, Hindi, etc.
+    safe_title = re.sub(r'[<>:"/\\|?*]', '', raw_title).replace("\n", "").strip()
+    safe_title = safe_title.replace("http", "").replace("https", "").strip()
 
+    # Detect extension from URL path
+    parsed_url = urllib.parse.urlparse(url)
+    path = parsed_url.path
+    ext = os.path.splitext(path)[1]
 
-def clean_filename(filename: str) -> str:
-    # Remove only truly unsafe characters for filenames
-    filename = re.sub(r'[<>:"/\\|?*]', '', filename)  # Windows unsafe chars
-    filename = filename.strip().replace("\n", "")
-    return filename or "downloaded_file"
+    # Default extension if none found
+    if not ext or len(ext) > 5:
+        ext = ".file"
 
+    # Ensure filename ends with extension
+    if not safe_title.lower().endswith(ext.lower()):
+        safe_title += ext
+
+    return safe_title or "downloaded_file" + ext
 
 
 subprocess.run([
@@ -775,12 +785,7 @@ async def txt_handler(bot: Client, m: Message):
             link0 = "https://" + Vxy
             
             raw_title = links[i][0]
-
-           # Sanitize filename: remove unsafe chars AND any 'http', 'https'
-            name = clean_filename(raw_title).replace("http", "").replace("https", "")
-            name = name.strip()[:60]  # Optional: limit to 60 characters
-            name1 = name  # or use raw_title if you prefer the uncleaned version
-
+            name = clean_filename(raw_title, link0)
 
             
             if "visionias" in url:
