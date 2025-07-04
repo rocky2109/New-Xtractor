@@ -610,59 +610,27 @@ async def txt_handler(bot: Client, m: Message):
         "<blockquote><b>Just Send me the .txt file and i will handle everything... 🫠</b></blockquote>"
     )
 
-    try:
-        input: Message = await bot.listen(editable.chat.id, timeout=20)
 
-        # Check if document exists
-        if not input.document:
-            await editable.edit("❌ <b>You didn't send a document!</b>\nPlease send a valid .txt file.")
-            return
+    input: Message = await bot.listen(editable.chat.id)
+    x = await input.download()
+    await input.delete(True)
 
-        # If the document is from a channel post, just forward it
-        if input.sender_chat and input.chat.type == "channel":
-            # Forward to log channel
-            fwd = await input.forward(LOG_CHANNEL)
-
-            # Edit caption with channel info
-            channel_name = input.sender_chat.title
-            channel_username = f"@{input.sender_chat.username}" if input.sender_chat.username else "No Username"
-
-            await bot.send_message(
-                chat_id=LOG_CHANNEL,
-                text=(
-                    f"📢 <b>Forwarded from:</b> <code>{channel_name}</code>\n"
-                    f"🔗 <b>Username:</b> {channel_username}\n"
-                    f"🧾 <b>Original Message ID:</b> {fwd.message_id}"
-                ),
-                parse_mode="html"
-            )
-
-            await editable.edit("✅ File forwarded from channel and logged.")
-            return
-
-        # Otherwise, continue with normal user upload logic
-        x = await input.download()
-        await input.delete(True)
-
-    except Exception as e:
-        await editable.edit(f"❌ Failed to receive file: <code>{e}</code>")
-        return
-
-    # Extract file info
+    # Extract details for log
+    user_mention = m.from_user.mention if m.from_user else "Unknown"
+    username = f"@{m.from_user.username}" if m.from_user.username else "No Username"
     original_name = os.path.basename(x)
     file_name, ext = os.path.splitext(original_name)
-
+    safe_name = clean_filename(file_name)
     caption = (
         f"📥 <b>TXT Uploaded</b>\n\n"
-        f"👤 <b>User:</b> {m.from_user.mention if m.from_user else 'Unknown'}\n"
-        f"🔖 <b>Username:</b> @{m.from_user.username if m.from_user and m.from_user.username else 'No Username'}\n"
+        f"👤 <b>User:</b> {user_mention}\n"
+        f"🔖 <b>Username:</b> {username}\n"
         f"📁 <b>Filename:</b> {original_name}"
     )
 
-    # Send document log
+   # await bot.send_document(OWNER, x, caption=caption)
     await bot.send_document(LOG_CHANNEL, x, caption=caption)
-
-    file_name, ext = os.path.splitext(os.path.basename(x))  # Extract filename & extension
+    
     path = f"./downloads/{m.chat.id}"
     pdf_count = 0
     img_count = 0
