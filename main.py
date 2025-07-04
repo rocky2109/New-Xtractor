@@ -811,6 +811,8 @@ async def txt_handler(bot: Client, m: Message):
             Vxy = links[i][1].replace("file/d/","uc?export=download&id=").replace("www.youtube-nocookie.com/embed", "youtu.be").replace("?modestbranding=1", "").replace("/view?usp=sharing","")
             url = "https://" + Vxy
             link0 = "https://" + Vxy
+            
+            raw_title = links[i][0]
 
            # Sanitize filename: remove unsafe chars AND any 'http', 'https'
             name = clean_filename(raw_title).replace("http", "").replace("https", "")
