@@ -43,8 +43,7 @@ import ffmpeg
 def clean_filename(raw_title: str, url: str) -> str:
     # Remove unsafe filesystem characters but keep emojis, Hindi, etc.
     safe_title = re.sub(r'[<>:"/\\|?*]', '', raw_title).replace("\n", "").strip()
-    safe_title = safe_title.replace("https", "").strip()
-
+    safe_title = safe_title.replace("http", "").replace("https", "").strip()
     # Detect extension from URL path
     parsed_url = urllib.parse.urlparse(url)
     path = parsed_url.path
@@ -613,7 +612,7 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
 
 @bot.on_message(filters.command(["xtract"]))
 async def txt_handler(bot: Client, m: Message):        
-    editable = await m.reply_text(f"**🔹Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
+    editable = await m.reply_text(f"** 🦋 Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
 
     input: Message = await bot.listen(editable.chat.id)
     x = await input.download()
