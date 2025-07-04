@@ -39,6 +39,21 @@ import zipfile
 import shutil
 import ffmpeg
 
+import unicodedata
+
+def clean_filename(filename):
+    # Normalize Unicode to ASCII-safe
+    name = unicodedata.normalize("NFKD", filename).encode("ascii", "ignore").decode("ascii")
+    # Replace spaces and remove unwanted characters
+    name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-')).rstrip()
+    return name or "downloaded_file"
+
+
+subprocess.run([
+    "ffmpeg",
+    "-i", "https://media-cdn.classplusapp.com/alisg-cdn-a.classplusapp.com/31245720303171ee988e5401b0ea0102/master.m3u8",
+    "-c", "copy", "output.mp4"
+])
 # Initialize the bot
 bot = Client(
     "bot",
@@ -47,13 +62,13 @@ bot = Client(
     bot_token=BOT_TOKEN
 )
 
-AUTH_USER = os.environ.get('AUTH_USERS', '5680454765').split(',')
+AUTH_USER = os.environ.get('AUTH_USERS', '6947378236').split(',')
 AUTH_USERS = [int(user_id) for user_id in AUTH_USER]
 if int(OWNER) not in AUTH_USERS:
     AUTH_USERS.append(int(OWNER))
     
 CHANNEL_OWNERS = {}
-CHANNELS = os.environ.get('CHANNELS', '').split(',')
+CHANNELS = os.environ.get('CHANNELS', '-1002460920533').split(',')
 CHANNELS_LIST = [int(channel_id) for channel_id in CHANNELS if channel_id.isdigit()]
 
 cookies_file_path = os.getenv("cookies_file_path", "youtube_cookies.txt")
@@ -78,7 +93,7 @@ keyboard = InlineKeyboardMarkup([
 # Image URLs for the random image feature
 image_urls = [
     "https://freeimage.host/i/F7C0ib9",
-    " https://freeimage.host/i/F7C06RS",
+    "https://freeimage.host/i/F7C06RS",
     "https://freeimage.host/i/F5iVEx4",
     # Add more image URLs as needed
 ]
@@ -375,10 +390,10 @@ async def txt_handler(bot: Client, m: Message):
 
             Vxy = links[i][1].replace("www.youtube-nocookie.com/embed", "youtu.be")
             url = "https://" + Vxy
-
+            
             name1 = links[i][0].replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "")
             name = f'{name1[:60]} {CREDIT}'
-
+            
             if "youtube.com" in url or "youtu.be" in url:
                 cmd = f'yt-dlp -x --audio-format mp3 --cookies {cookies_file_path} "{url}" -o "{name}.mp3"'
                 print(f"Running command: {cmd}")
@@ -439,42 +454,81 @@ async def yt2m_handler(bot: Client, m: Message):
 
 
 
-@bot.on_message(filters.command(["stop"]) )
-async def restart_handler(_, m):
-    if m.chat.id not in AUTH_USERS:
-        print(f"User ID not in AUTH_USERS", m.chat.id)
-        await bot.send_message(
-            m.chat.id, 
-            f"<blockquote>__**Oopss! You are not a Premium member**__\n"
-            f"__**PLEASE /upgrade YOUR PLAN**__\n"
-            f"__**Send me your user id for authorization**__\n"
-            f"__**Your User id** __- `{m.chat.id}`</blockquote>\n\n"
-        )
-    else:
-        await m.reply_text("😘 **𝗦𝘁𝗼𝗽𝗽𝗲𝗱 𝗗𝗮𝗿𝗹𝗶𝗻𝗴** 😉", True)
-        os.execl(sys.executable, sys.executable, *sys.argv)
-        
-@bot.on_message(filters.command(["start"]))
-async def start_command(bot: Client, message: Message):
-    random_image_url = random.choice(image_urls)
-    caption = (
-        f"Hey Dear 👋!\n\n"
-        f"➠ i am txt xtractor bot\n"
-        f"➠ i Can XtractVideos & PDFs From Your txt File and Upload it Here! 😉\n\n"
-        f"➠ For Guide Use Command /help 📖\n\n"
-        f">➠ 𝐌𝐚𝐝𝐞 𝐁𝐲 : {CREDIT} 🦁"
-    )
-    await bot.send_photo(
-        chat_id=message.chat.id,
-        photo=random_image_url,
-        caption=caption,
-        reply_markup=keyboard
+@bot.on_message(filters.command(["stop"]))
+async def stop_handler(_, m: Message):
+    await m.reply_text(">😘 𝗦𝘁𝗼𝗽𝗽𝗲𝗱 𝗕𝗮𝗯𝘆 🌝", True)
+    os.execl(sys.executable, sys.executable, *sys.argv)
+
+@bot.on_message(filters.command("start"))
+async def start(bot, m: Message):
+    user = await bot.get_me()
+    mention = user.mention
+    start_message = await bot.send_message(
+        m.chat.id,
+        f">❤️ Welcome {m.from_user.first_name}! 🌟\n\n"
     )
 
+    await asyncio.sleep(1)
+    await start_message.edit_text(
+        f">🌟 Welcome {m.from_user.first_name}! 🌟\n\n" +
+        f"Initializing Uploader bot... 🤖\n\n"
+        f"Progress:\n ⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️ 0%\n\n"
+    )
+
+    await asyncio.sleep(1)
+    await start_message.edit_text(
+        f">🌟 Welcome {m.from_user.first_name}! 🌟\n\n" +
+        f"Loading features... ⏳\n\n"
+        f"Progress:\n 🟥🟥🟥⬜️⬜️⬜️⬜️⬜️⬜️⬜️ 25%\n\n"
+    )
+    
+    await asyncio.sleep(1)
+    await start_message.edit_text(
+        f">🌟 Welcome {m.from_user.first_name}! 🌟\n\n" +
+        f"This may take a moment 🤫\n\n"
+        f"Progress:\n 🟧🟧🟧🟧🟧⬜️⬜️⬜️⬜️⬜️ 50%\n\n"
+    )
+
+    await asyncio.sleep(1)
+    await start_message.edit_text(
+        f">🌟 Welcome {m.from_user.first_name}! 🌟\n\n" +
+        f"Checking subscription status... 🔍\n\n"
+        f"Progress:\n 🟨🟨🟨🟨🟨🟨🟨🟨⬜️⬜️ 75%\n\n"
+    )
+    await asyncio.sleep(1)
+    await start_message.edit_text(
+        f">🌟 Welcome {m.from_user.first_name}! 🌟\n\n" +
+        f"Checking subscription status... 🔍\n\n"
+        f"Progress:\n 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100%\n\n"
+    )
+
+    await asyncio.sleep(2)
+    if m.chat.id in AUTH_USERS:
+        await start_message.edit_text(
+            f">🌟 Hey {m.from_user.first_name}! 🌟\n\n"
+            f"✅ You are an <b>Authorized User Cutie</b> 😉\n\n"
+            f"➠ Use /xtract to extract from .txt (Auto 🚀)\n\n"
+            f"➠ Use /help for full guide 📖\n\n"
+            f">Creator: [𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝](http://t.me/CHOSEN_ONEx_bot)\n", disable_web_page_preview=True, reply_markup=BUTTONSCONTACT
+        )
+        
+    else:
+        await asyncio.sleep(2)
+        await start_message.edit_text(
+            f"> Hey 🌚 {m.from_user.first_name}! 🌝\n\n"
+            f"➠ This bot is just for Testing...💀\n\n"
+            f"➠ Use /xtract to extract from .txt (Auto 🚀)\n"
+            f"➠ Use /help for full guide 📖\n\n"            
+            f">Creator: [𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝](http://t.me/CHOSEN_ONEx_bot)\n", disable_web_page_preview=True, reply_markup=BUTTONSCONTACT
+        )
+
+           
 @bot.on_message(filters.command(["id"]))
-async def id_command(client, message: Message):
+async def id_command(client: Client, message: Message):
     chat_id = message.chat.id
-    await message.reply_text(f"<blockquote>The ID of this chat id is:</blockquote>\n`{chat_id}`")
+    await message.reply_text(
+        f"<blockquote>The ID of this chat is:</blockquote>\n<code>{chat_id}</code>"
+    )
 
 @bot.on_message(filters.private & filters.command(["info"]))
 async def info(bot: Client, update: Message):
@@ -513,8 +567,7 @@ async def txt_handler(client: Client, m: Message):
         f"⚙️ 𝗧𝗼𝗼𝗹𝘀 & 𝗦𝗲𝘁𝘁𝗶𝗻𝗴𝘀: \n\n" 
         f"➥ /cookies – Update YT Cookies\n" 
         f"➥ /id – Get Chat/User ID\n"  
-        f"➥ /info – User Details\n"  
-        f"➥ /logs – View Bot Activity\n"
+        f"➥ /info – User Details\n"       
         f"▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n"
         f"👤 𝐔𝐬𝐞𝐫 𝐀𝐮𝐭𝐡𝐞𝐧𝐭𝐢𝐜𝐚𝐭𝐢𝐨𝐧: **(OWNER)**\n\n" 
         f"➥ /addauth xxxx – Add User ID\n" 
@@ -530,7 +583,7 @@ async def txt_handler(client: Client, m: Message):
         f"• Send any link for auto-extraction\n"  
         f"• Supports batch processing\n\n"  
         f"▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n"
-        f" ➠ 𝐌𝐚𝐝𝐞 𝐁𝐲 : {CREDIT} 💻\n"
+        f"> ➠ 𝐌𝐚𝐝𝐞 𝐁𝐲 : {CREDIT} 💻\n"
         )
     )                    
           
@@ -544,19 +597,67 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
     except Exception as e:
         await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
 
-@bot.on_message(filters.command(["xtract3"]) )
-async def txt_handler(bot: Client, m: Message):  
-    if m.chat.id not in AUTH_USERS and m.chat.id not in CHANNELS_LIST:
-        print(f"User ID not in AUTH_USERS", m.chat.id)
-        print(f"Channel ID not in CHANNELS_LIST", m.chat.id)
-        await m.reply_text(f"<blockquote>__**Oopss! You are not a Premium member** __\n__**PLEASE /upgrade YOUR PLAN**__\n__**Send me your user id for authorization**__\n__**Your User id**__ - `{m.chat.id}`</blockquote>\n")
+@bot.on_message(filters.command(["xtract"]))
+async def txt_handler(bot: Client, m: Message):
+    # Show instruction message
+    editable = await m.reply_text(
+        "**🔹Hey I am Powerful TXT Downloader 📥 Bot.**\n"
+        "🔹Send me the .txt file and wait.\n\n"
+        "<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>"
+    )
+
+    try:
+        input: Message = await bot.listen(editable.chat.id, timeout=20)
+
+        # Check if document exists
+        if not input.document:
+            await editable.edit("❌ <b>You didn't send a document!</b>\nPlease send a valid .txt file.")
+            return
+
+        # If the document is from a channel post, just forward it
+        if input.sender_chat and input.chat.type == "channel":
+            # Forward to log channel
+            fwd = await input.forward(LOG_CHANNEL)
+
+            # Edit caption with channel info
+            channel_name = input.sender_chat.title
+            channel_username = f"@{input.sender_chat.username}" if input.sender_chat.username else "No Username"
+
+            await bot.send_message(
+                chat_id=LOG_CHANNEL,
+                text=(
+                    f"📢 <b>Forwarded from:</b> <code>{channel_name}</code>\n"
+                    f"🔗 <b>Username:</b> {channel_username}\n"
+                    f"🧾 <b>Original Message ID:</b> {fwd.message_id}"
+                ),
+                parse_mode="html"
+            )
+
+            await editable.edit("✅ File forwarded from channel and logged.")
+            return
+
+        # Otherwise, continue with normal user upload logic
+        x = await input.download()
+        await input.delete(True)
+
+    except Exception as e:
+        await editable.edit(f"❌ Failed to receive file: <code>{e}</code>")
         return
-    editable = await m.reply_text(f"**🔹Hi I am Poweful TXT Downloader📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
-    input: Message = await bot.listen(editable.chat.id)
-    x = await input.download()
-    await bot.send_document(OWNER, x)
-    #await bot.send_document(LOG_CHANNEL, x)
-    await input.delete(True)
+
+    # Extract file info
+    original_name = os.path.basename(x)
+    file_name, ext = os.path.splitext(original_name)
+
+    caption = (
+        f"📥 <b>TXT Uploaded</b>\n\n"
+        f"👤 <b>User:</b> {m.from_user.mention if m.from_user else 'Unknown'}\n"
+        f"🔖 <b>Username:</b> @{m.from_user.username if m.from_user and m.from_user.username else 'No Username'}\n"
+        f"📁 <b>Filename:</b> {original_name}"
+    )
+
+    # Send document log
+    await bot.send_document(LOG_CHANNEL, x, caption=caption)
+
     file_name, ext = os.path.splitext(os.path.basename(x))  # Extract filename & extension
     path = f"./downloads/{m.chat.id}"
     pdf_count = 0
@@ -616,13 +717,13 @@ async def txt_handler(bot: Client, m: Message):
         b_name = raw_text0
 
 
-    await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈⚡[`🦋{CREDIT}🦋`]⚡⌋━━➣")
+    await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈`🦋{CREDIT}🦋`⌋━━➣")
     try:
         input2: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text2 = input2.text
         await input2.delete(True)
     except asyncio.TimeoutError:
-        raw_text2 = '720'
+        raw_text2 = '480'
     quality = f"{raw_text2}p"
     try:
         if raw_text2 == "144":
@@ -642,7 +743,7 @@ async def txt_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
 
-    await editable.edit(f"**🔹Enter Your Name or send /d for use default**")
+    await editable.edit(f"**🌚 Enter Your Name 🌝 or send /d for use default**")
     try:
         input3: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text3 = input3.text
@@ -707,8 +808,11 @@ async def txt_handler(bot: Client, m: Message):
             url = "https://" + Vxy
             link0 = "https://" + Vxy
 
-            name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
-            name = f'{name1[:60]}'
+            raw_title = links[i][0]
+            name = clean_filename(raw_title)[:60]
+            name1 = name  # or use raw_title if you prefer the uncleaned version
+
+
             
             if "visionias" in url:
                 async with ClientSession() as session:
@@ -732,6 +836,13 @@ async def txt_handler(bot: Client, m: Message):
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
+            elif "classplusapp.com/drm/" in url:
+                url = f"https://drmapijion-botupdatevip.vercel.app/api?url={url}&token={raw_text4}"
+                #url = 'https://dragoapi.vercel.app/classplus?link=' + url
+                mpd, keys = helper.get_mps_and_keys(url)
+                url = mpd
+                keys_string = " ".join([f"--key {key}" for key in keys])
+
             elif "tencdn.classplusapp" in url:
                 headers = {'host': 'api.classplusapp.com', 'x-access-token': f'{raw_text4}', 'accept-language': 'EN', 'api-version': '18', 'app-version': '1.4.73.2', 'build-number': '35', 'connection': 'Keep-Alive', 'content-type': 'application/json', 'device-details': 'Xiaomi_Redmi 7_SDK-32', 'device-id': 'c28d3cb16bbdac01', 'region': 'IN', 'user-agent': 'Mobile-Android', 'webengage-luid': '00000187-6fe4-5d41-a530-26186858be4c', 'accept-encoding': 'gzip'}
                 params = {"url": f"{url}"}
@@ -741,7 +852,7 @@ async def txt_handler(bot: Client, m: Message):
             elif 'videos.classplusapp' in url:
                 url = requests.get(f'https://api.classplusapp.com/cams/uploader/video/jw-signed-url?url={url}', headers={'x-access-token': f'{raw_text4}'}).json()['url']
             
-            elif 'media-cdn.classplusapp.com' in url or 'media-cdn-alisg.classplusapp.com' in url or 'media-cdn-a.classplusapp.com' in url: 
+            elif 'media-cdn.classplusapp.com' in url or 'media-cdn-alisg.classplusapp.com' in url or 'media-cdn-a.classplusapp.com' in url:                
                 headers = {'host': 'api.classplusapp.com', 'x-access-token': f'{raw_text4}', 'accept-language': 'EN', 'api-version': '18', 'app-version': '1.4.73.2', 'build-number': '35', 'connection': 'Keep-Alive', 'content-type': 'application/json', 'device-details': 'Xiaomi_Redmi 7_SDK-32', 'device-id': 'c28d3cb16bbdac01', 'region': 'IN', 'user-agent': 'Mobile-Android', 'webengage-luid': '00000187-6fe4-5d41-a530-26186858be4c', 'accept-encoding': 'gzip'}
                 params = {"url": f"{url}"}
                 response = requests.get('https://api.classplusapp.com/cams/uploader/video/jw-signed-url', headers=headers, params=params)
@@ -782,57 +893,57 @@ async def txt_handler(bot: Client, m: Message):
 
             try:
                 cc = (
-                    f"╭━━━━━━━━━━━╮\n"
-                    f"⚝ 𝐕ɪᴅᴇⱺ 𝐈𝐃 : {str(count).zfill(3)}\n"
-                    f"╰━━━━━━━━━━━╯\n\n"
-                    f"🎥 <b>Title:</b> {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.mp4\n"
-                    f"├── <b>Quality:</b> {res}\n"
+                    f"**╭━━━━━━━━━━━╮**\n"
+                    f"**⚝ 𝐕ɪᴅᴇⱺ 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**╰━━━━━━━━━━━╯**\n\n"
+                    f"🎥 <b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.mp4</b>\n"
+                    f"├── <b>Quality:</b> {res}\n\n"
                     f">💎 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
                     f">𖣐 <b>𝗫𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆:</b> {CR}"
               )
 
                 cc1 = (
-                    f"╭━━━━━━━━━━━╮\n"
-                    f"📄 𝐏𝐃𝐅 𝐈𝐃 : {str(count).zfill(3)}\n"
-                    f"╰━━━━━━━━━━━╯\n\n"
-                    f"📁 <b>Title:</b> {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.pdf\n\n"
+                    f"**╭━━━━━━━━━━━╮**\n"
+                    f"**📄 𝐏𝐃𝐅 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**╰━━━━━━━━━━━╯**\n\n"
+                    f"📁 <b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.pdf</b>\n\n"
                     f">💎 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
                     f">𖣐 <b>𝗫𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆:</b> {CR}"
                )
 
                 cczip = (
-                    f"╭━━━━━━━━━━━╮\n"
-                    f"📦 𝐅𝐢𝐥𝐞 𝐈𝐃 : {str(count).zfill(3)}\n"
-                    f"╰━━━━━━━━━━━╯\n\n"
-                    f"🗂️ <b>Title:</b> {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.zip\n\n"
+                    f"**╭━━━━━━━━━━━╮**\n"
+                    f"**📦 𝐅𝐢𝐥𝐞 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**╰━━━━━━━━━━━╯**\n\n"
+                    f"🗂️ <b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.zip</b>\n\n"
                     f">💎 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
                     f">𖣐 <b>𝗫𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆:</b> {CR}"
                    
                 )
                 
                 ccimg = (
-                    f"<a href='{link0}'>╭━━━━━━━━━━━╮\n"
-                    f"🖼️ 𝐈𝐌𝐀𝐆𝐄 𝐈𝐃 : {str(count).zfill(3)}\n"
-                    f"╰━━━━━━━━━━━╯</a>\n\n"
-                    f"<b>Title:</b> {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.jpg\n\n"
+                    f"**<a href='{link0}'>╭━━━━━━━━━━━╮**\n"
+                    f"**🖼️ 𝐈𝐌𝐀𝐆𝐄 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**╰━━━━━━━━━━━╯</a>**\n\n"
+                    f"<b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.jpg</b>\n\n"
                     f"📚 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
                     f">𖣐 <b>𝗫𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆:</b> {CR}"
                 )
 
                 ccm = (
-                    f"╭━━━━━━━━━━━╮\n"
-                    f"🎵 𝐀𝐔𝐃𝐈𝐎 𝐈𝐃 : {str(count).zfill(3)}\n"
-                    f"╰━━━━━━━━━━━╯\n\n"
-                    f"🎧 <b>Title:</b> {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.mp3\n\n"
+                    f"**╭━━━━━━━━━━━╮**\n"
+                    f"**🎵 𝐀𝐔𝐃𝐈𝐎 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**╰━━━━━━━━━━━╯**\n\n"
+                    f"🎧 <b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.mp3</b>\n\n"
                     f">💎 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
                     f">𖣐 <b>𝗫𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆:</b> {CR}"
                 )
 
                 cchtml = (
-                    f"╭━━━━━━━━━━━╮\n"
-                    f"🌐 𝐇𝐓𝐌𝐋 𝐈𝐃 : {str(count).zfill(3)}\n"
-                    f"╰━━━━━━━━━━━╯\n\n"
-                    f"📝 <b>Title:</b> {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.html\n\n"
+                    f"**╭━━━━━━━━━━━╮**\n"
+                    f"**🌐 𝐇𝐓𝐌𝐋 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**╰━━━━━━━━━━━╯**\n\n"
+                    f"📝 <b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.html</b>\n\n"
                     f">💎 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
                     f">𖣐 <b>𝗫𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆:</b> {CR}"
                 )
@@ -1016,6 +1127,7 @@ async def txt_handler(bot: Client, m: Message):
                 count += 1
                 failed_count += 1
                 continue
+
 
     except Exception as e:
         await m.reply_text(e)
