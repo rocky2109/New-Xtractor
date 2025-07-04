@@ -515,8 +515,8 @@ async def start(bot, m: Message):
     else:
         await asyncio.sleep(2)
         await start_message.edit_text(
-            f"> Hey 🌚 {m.from_user.first_name}! 🌝\n\n"
-            f"➠ This bot is just for Testing...💀\n\n"
+            f"> Hey Dear {m.from_user.first_name}!\n\n"
+            f"thanks for being with us 😊\n\n"
             f"➠ Use /xtract to extract from .txt (Auto 🚀)\n"
             f"➠ Use /help for full guide 📖\n\n"            
             f">Creator: [𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝](http://t.me/CHOSEN_ONEx_bot)\n", disable_web_page_preview=True, reply_markup=BUTTONSCONTACT
@@ -597,13 +597,16 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
     except Exception as e:
         await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
 
-@bot.on_message(filters.command(["xtract"]))
-async def txt_handler(bot: Client, m: Message):
-    # Show instruction message
+@bot.on_message(filters.command(["xtract"]) )
+async def txt_handler(bot: Client, m: Message):  
+    if m.chat.id not in AUTH_USERS and m.chat.id not in CHANNELS_LIST:
+        print(f"User ID not in AUTH_USERS", m.chat.id)
+        print(f"Channel ID not in CHANNELS_LIST", m.chat.id)
+        await m.reply_text(f"<blockquote>__**Oopss You are not authorized to use me.** __\n**i just follow my Boss command only 🫠\n__**</blockquote>")
+        return
     editable = await m.reply_text(
-        "**🔹Hey I am Powerful TXT Downloader 📥 Bot.**\n"
-        "🔹Send me the .txt file and wait.\n\n"
-        "<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>"
+        "**All Set Sir 🫡**\n"        
+        "<blockquote><b>Just Send me the .txt file and i will handle everything... 🫠</b></blockquote>"
     )
 
     try:
@@ -689,7 +692,7 @@ async def txt_handler(bot: Client, m: Message):
         os.remove(x)
         return
     
-    await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>🔹Img : {img_count}  🔹PDF : {pdf_count}\n🔹ZIP : {zip_count}  🔹Other : {other_count}</blockquote>\n🔹Send From where you want to download.**")
+    await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>💠 Img : {img_count}  💠 PDF : {pdf_count}\n💠 ZIP : {zip_count}  💠 Video : {other_count}</blockquote>\n🔹Send From where you want to download sir**")
     try:
         input0: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text = input0.text
@@ -717,13 +720,13 @@ async def txt_handler(bot: Client, m: Message):
         b_name = raw_text0
 
 
-    await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈`🦋{CREDIT}🦋`⌋━━➣")
+    await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈🦋{CREDIT}🦋")
     try:
         input2: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text2 = input2.text
         await input2.delete(True)
     except asyncio.TimeoutError:
-        raw_text2 = '480'
+        raw_text2 = '720 '
     quality = f"{raw_text2}p"
     try:
         if raw_text2 == "144":
