@@ -747,7 +747,7 @@ async def txt_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
 
-    await editable.edit(f"** Set Any Other Name if you want or send /d for use default i know your name sir 🫣**")
+    await editable.edit(f"** Set Any Other Name if you want or send /d for use default**")
     try:
         input3: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text3 = input3.text
@@ -812,8 +812,9 @@ async def txt_handler(bot: Client, m: Message):
             url = "https://" + Vxy
             link0 = "https://" + Vxy
 
-            raw_title = links[i][0]
-            name = clean_filename(raw_title)[:60]
+           # Sanitize filename: remove unsafe chars AND any 'http', 'https'
+            name = clean_filename(raw_title).replace("http", "").replace("https", "")
+            name = name.strip()[:60]  # Optional: limit to 60 characters
             name1 = name  # or use raw_title if you prefer the uncleaned version
 
 
