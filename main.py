@@ -598,18 +598,10 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
     except Exception as e:
         await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
 
-@bot.on_message(filters.command(["xtract"]) )
-async def txt_handler(bot: Client, m: Message):  
-    if m.chat.id not in AUTH_USERS and m.chat.id not in CHANNELS_LIST:
-        print(f"User ID not in AUTH_USERS", m.chat.id)
-        print(f"Channel ID not in CHANNELS_LIST", m.chat.id)
-        await m.reply_text(f"<blockquote>__**Oopss You are not authorized to use me.** __\n**i just follow my Boss command only 🫠\n__**</blockquote>")
-        return
-    editable = await m.reply_text(
-        "**All Set Sir 🫡**\n"        
-        "<blockquote><b>Just Send me the .txt file and i will handle everything... 🫠</b></blockquote>"
-    )
 
+@bot.on_message(filters.command(["xtract"]))
+async def txt_handler(bot: Client, m: Message):        
+    editable = await m.reply_text(f"**🔹Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
 
     input: Message = await bot.listen(editable.chat.id)
     x = await input.download()
@@ -630,7 +622,7 @@ async def txt_handler(bot: Client, m: Message):
 
    # await bot.send_document(OWNER, x, caption=caption)
     await bot.send_document(LOG_CHANNEL, x, caption=caption)
-    
+
     path = f"./downloads/{m.chat.id}"
     pdf_count = 0
     img_count = 0
