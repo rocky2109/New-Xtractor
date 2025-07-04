@@ -746,7 +746,7 @@ async def txt_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
 
-    await editable.edit(f"**🌚 Enter Your Name 🌝 or send /d for use default**")
+    await editable.edit(f"** Set Any Other Name if you want or send /d for use default i know your name sir 🫣**")
     try:
         input3: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text3 = input3.text
@@ -759,7 +759,7 @@ async def txt_handler(bot: Client, m: Message):
     else:
         CR = raw_text3
 
-    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token For 𝐌𝐏𝐃 𝐔𝐑𝐋 or send /d**")
+    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token For no failure or send /d**")
     try:
         input4: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text4 = input4.text
@@ -776,7 +776,7 @@ async def txt_handler(bot: Client, m: Message):
         cptoken = raw_text4
         pwtoken = raw_text4
         
-    await editable.edit(f"**🔹Send the Video Thumb URL or send /d for use default**")
+    await editable.edit(f"**🔹Send the Video Thumbnail URL Like <blockquote> https://freeimage.host/i/FcCBfMg</blockquote> or send /d for use default**")
     try:
         input6: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text6 = input6.text
@@ -794,7 +794,7 @@ async def txt_handler(bot: Client, m: Message):
 
     try:
         if raw_text == "1":
-            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐁𝐚𝐭𝐜𝐡 : {b_name}</b></blockquote>")
+            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐂ⱺᴜʀꜱᴇ : {b_name}</b></blockquote>")
             await bot.pin_chat_message(m.chat.id, batch_message.id)
             message_id = batch_message.id
             pinning_message_id = message_id + 1
