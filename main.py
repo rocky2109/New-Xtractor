@@ -43,7 +43,7 @@ import ffmpeg
 def clean_filename(raw_title: str, url: str) -> str:
     # Remove unsafe filesystem characters but keep emojis, Hindi, etc.
     safe_title = re.sub(r'[<>:"/\\|?*]', '', raw_title).replace("\n", "").strip()
-    safe_title = safe_title.replace("http", "").replace("https", "").strip()
+    safe_title = safe_title.replace("https", "").strip()
 
     # Detect extension from URL path
     parsed_url = urllib.parse.urlparse(url)
