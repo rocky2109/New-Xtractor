@@ -627,7 +627,7 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
 async def txt_handler(bot: Client, m: Message):
     # Show instruction message
     editable = await m.reply_text(
-        "**🔹Hey I am Powerful TXT Downloader 📥 Bot.**\n"
+        "**🔹Hey Sir Just Send Me txt**\n"
         "🔹Send me the .txt file and wait.\n\n"
         "<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>"
     )
@@ -698,9 +698,10 @@ async def txt_handler(bot: Client, m: Message):
         
         links = []
         for i in content:
+            i = i.strip()
             if "://" in i:
-                url = i.split("://", 1)[1]
-                links.append(i.split("://", 1))
+                url = i.lower()  # For extension check
+                links.append(i)
                 if ".pdf" in url:
                     pdf_count += 1
                 elif url.endswith((".png", ".jpeg", ".jpg")):
