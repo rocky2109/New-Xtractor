@@ -795,7 +795,7 @@ async def txt_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
 
-    await editable.edit(f"**🌚 Enter Your Name 🌝 or send /d for use default**")
+    await editable.edit(f"** Enter Your Name or send /d for use default sir**")
     try:
         input3: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text3 = input3.text
@@ -860,10 +860,8 @@ async def txt_handler(bot: Client, m: Message):
             url = "https://" + Vxy
             link0 = "https://" + Vxy
 
-            raw_title = links[i][0]
-            name = clean_filename(raw_title)[:60]
-            name1 = name  # or use raw_title if you prefer the uncleaned version
-
+            name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
+            name = f'{name1[:60]}'
 
             
             if "visionias" in url:
