@@ -643,16 +643,17 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
     except Exception as e:
         await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
 
-@bot.on_message(filters.command(["xtract"]))
 async def txt_handler(bot: Client, m: Message):
-    # ✅ Check if user is authorized
-    if m.from_user.id not in AUTH_USERS:
-        await m.reply_text("❌ You are not authorized to use this command. i Just Follow my Boss Commands Only 🫠")
+    # ✅ Check if sender is authorized — handle anonymous admins (no `from_user`)
+    sender_id = m.from_user.id if m.from_user else m.sender_chat.id if m.sender_chat else None
+
+    if sender_id not in AUTH_USERS:
+        await m.reply_text("❌ You are not authorized to use this command. I just follow my Boss's commands only 🫠")
         return
 
     # Show instruction message
     editable = await m.reply_text(
-        "**👑 Hey Sir Just Send Me txt**\n"
+        "**All Set Sir 🫡**\n"
         "<blockquote><b>Just Send Me txt File & i will handle it automatically until its Done 😊</b></blockquote>"
     )
 
@@ -661,7 +662,7 @@ async def txt_handler(bot: Client, m: Message):
 
         # ✅ Check if document exists
         if not input.document or not input.document.file_name.endswith(".txt"):
-            await editable.edit("❌ <b>You didn't send a valid .txt file!</b>\nPlease try again.")
+            await editable.edit("🫣 <b>You didn't send a valid .txt file!</b>\nPlease try again.")
             return
 
         # If the document is from a channel post, just forward it
@@ -806,7 +807,7 @@ async def txt_handler(bot: Client, m: Message):
     else:
         CR = raw_text3
 
-    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token For 𝐌𝐏𝐃 𝐔𝐑𝐋 or send /d**")
+    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token or send /d**")
     try:
         input4: Message = await bot.listen(editable.chat.id, timeout=30)
         raw_text4 = input4.text
@@ -815,7 +816,7 @@ async def txt_handler(bot: Client, m: Message):
         raw_text4 = '/d'
 
     if raw_text4 == '/d':
-        cwtoken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3MjQyMzg3OTEsImNvbiI6eyJpc0FkbWluIjpmYWxzZSwiYXVzZXIiOiJVMFZ6TkdGU2NuQlZjR3h5TkZwV09FYzBURGxOZHowOSIsImlkIjoiZEUxbmNuZFBNblJqVEROVmFWTlFWbXhRTkhoS2R6MDkiLCJmaXJzdF9uYW1lIjoiYVcxV05ITjVSemR6Vm10ak1WUlBSRkF5ZVNzM1VUMDkiLCJlbWFpbCI6Ik5Ga3hNVWhxUXpRNFJ6VlhiR0ppWTJoUk0wMVdNR0pVTlU5clJXSkRWbXRMTTBSU2FHRnhURTFTUlQwPSIsInBob25lIjoiVUhVMFZrOWFTbmQ1ZVcwd1pqUTViRzVSYVc5aGR6MDkiLCJhdmF0YXIiOiJLM1ZzY1M4elMwcDBRbmxrYms4M1JEbHZla05pVVQwOSIsInJlZmVycmFsX2NvZGUiOiJOalZFYzBkM1IyNTBSM3B3VUZWbVRtbHFRVXAwVVQwOSIsImRldmljZV90eXBlIjoiYW5kcm9pZCIsImRldmljZV92ZXJzaW9uIjoiUShBbmRyb2lkIDEwLjApIiwiZGV2aWNlX21vZGVsIjoiU2Ftc3VuZyBTTS1TOTE4QiIsInJlbW90ZV9hZGRyIjoiNTQuMjI2LjI1NS4xNjMsIDU0LjIyNi4yNTUuMTYzIn19.snDdd-PbaoC42OUhn5SJaEGxq0VzfdzO49WTmYgTx8ra_Lz66GySZykpd2SxIZCnrKR6-R10F5sUSrKATv1CDk9ruj_ltCjEkcRq8mAqAytDcEBp72-W0Z7DtGi8LdnY7Vd9Kpaf499P-y3-godolS_7ixClcYOnWxe2nSVD5C9c5HkyisrHTvf6NFAuQC_FD3TzByldbPVKK0ag1UnHRavX8MtttjshnRhv5gJs5DQWj4Ir_dkMcJ4JaVZO3z8j0OxVLjnmuaRBujT-1pavsr1CCzjTbAcBvdjUfvzEhObWfA1-Vl5Y4bUgRHhl1U-0hne4-5fF0aouyu71Y6W0eg'
+        cwtoken = 'eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpZCI6MTU1NDQ1OTczLCJvcmdJZCI6NzM1NTQ4LCJ0eXBlIjoxLCJtb2JpbGUiOiI5MTk3NTAwMjQ5MzciLCJuYW1lIjoicmFodWwga3VtYXIgdGl3YXJpIiwiZW1haWwiOiJlbGVjdHJhMjAzMjhAMmNsLnZlcnRleGl1bS5uZXQiLCJpc0ZpcnN0TG9naW4iOnRydWUsImRlZmF1bHRMYW5ndWFnZSI6IkVOIiwiY291bnRyeUNvZGUiOiJJTiIsImlzSW50ZXJuYXRpb25hbCI6MCwiaXNEaXkiOnRydWUsImxvZ2luVmlhIjoiT3RwIiwiZmluZ2VycHJpbnRJZCI6IjQ3MGVmOGU0YjllMjQzYWI4ZTQ2NTA5NmJjOTI4YjQ1IiwiaWF0IjoxNzUxNzE1NTM0LCJleHAiOjE3NTIzMjAzMzR9.aLpqyasMSgv87cyDeYVgcfIxx8nost2GRMOUisafyxcSmhHixOoP-lhceOdtt2VjDtGi8LdnY7Vd9Kpaf499P-y3-godolS_7ixClcYOnWxe2nSVD5C9c5HkyisrHTvf6NFAuQC_FD3TzByldbPVKK0ag1UnHRavX8MtttjshnRhv5gJs5DQWj4Ir_dkMcJ4JaVZO3z8j0OxVLjnmuaRBujT-1pavsr1CCzjTbAcBvdjUfvzEhObWfA1-Vl5Y4bUgRHhl1U-0hne4-5fF0aouyu71Y6W0eg'
         cptoken = "cptoken"
         pwtoken = "pwtoken"
     else:
