@@ -40,14 +40,12 @@ import shutil
 import ffmpeg
 
 
-import re
-
-def clean_filename(filename: str) -> str:
-    # Remove only truly unsafe characters for filenames
-    filename = re.sub(r'[<>:"/\\|?*]', '', filename)  # Windows unsafe chars
-    filename = filename.strip().replace("\n", "")
-    return filename or "downloaded_file"
-
+def clean_filename(filename):
+    # Normalize Unicode to ASCII-safe
+    name = unicodedata.normalize("NFKD", filename).encode("ascii", "ignore").decode("ascii")
+    # Replace spaces and remove unwanted characters
+    name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-')).rstrip()
+    return name or "downloaded_file"
 
 
 subprocess.run([
