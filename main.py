@@ -698,10 +698,9 @@ async def txt_handler(bot: Client, m: Message):
         
         links = []
         for i in content:
-            i = i.strip()
             if "://" in i:
-                url = i.lower()  # For extension check
-                links.append(i)
+                url = i.split("://", 1)[1]
+                links.append(i.split("://", 1))
                 if ".pdf" in url:
                     pdf_count += 1
                 elif url.endswith((".png", ".jpeg", ".jpg")):
