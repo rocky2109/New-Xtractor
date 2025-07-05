@@ -770,9 +770,11 @@ async def txt_handler(bot: Client, m: Message):
             Vxy = links[i][1].replace("file/d/","uc?export=download&id=").replace("www.youtube-nocookie.com/embed", "youtu.be").replace("?modestbranding=1", "").replace("/view?usp=sharing","")
             url = "https://" + Vxy
             link0 = "https://" + Vxy
-            
+
             raw_title = links[i][0]
-            name = clean_filename(raw_title, link0)
+            name = clean_filename(raw_title)[:60]
+            name1 = name  # or use raw_title if you prefer the uncleaned version
+
 
             
             if "visionias" in url:
