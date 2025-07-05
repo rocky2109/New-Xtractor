@@ -40,6 +40,7 @@ import shutil
 import ffmpeg
 import unicodedata
 
+import re
 import unicodedata
 
 def clean_filename(text: str) -> str:
@@ -90,13 +91,6 @@ def clean_filename(text: str) -> str:
 
     return text.strip()
 
-        clean.append(char)
-
-    text = ''.join(clean)
-    text = re.sub(r'[^\w\s.\-()\[\]–—\u0900-\u097F\u0A80-\u0AFF\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0D80-\u0DFF\u0E00-\u0E7F\u0A00-\u0A7F\u0980-\u09FF\u0A00-\u0A7F]', '', text)
-    text = re.sub(r'[_\s\-]+', ' ', text)
-
-    return text.strip()
 
 
 
