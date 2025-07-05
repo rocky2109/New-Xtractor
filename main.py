@@ -38,7 +38,7 @@ import aiofiles
 import zipfile
 import shutil
 import ffmpeg
-
+import unicodedata
 
 def clean_filename(filename):
     # Normalize Unicode to ASCII-safe
