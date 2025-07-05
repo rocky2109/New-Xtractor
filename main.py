@@ -40,12 +40,38 @@ import shutil
 import ffmpeg
 import unicodedata
 
-def clean_filename(filename):
-    # Normalize Unicode to ASCII-safe
-    name = unicodedata.normalize("NFKD", filename).encode("ascii", "ignore").decode("ascii")
-    # Replace spaces and remove unwanted characters
-    name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-')).rstrip()
-    return name or "downloaded_file"
+import re
+import unicodedata  # ✅ Required for removing stylized unicode
+
+def clean_filename(text: str) -> str:
+    if not text:
+        return "file"
+
+    clean = []
+    for char in text:
+        name = unicodedata.name(char, "")
+        codepoint = ord(char)
+
+        # ❌ Skip known stylized or emoji blocks
+        if (
+            any(sub in name for sub in [
+                "MATHEMATICAL", "DOUBLE-STRUCK", "CIRCLED", "SQUARED", "FULLWIDTH", "BOLD",
+                "ITALIC", "SCRIPT", "BLACK", "FRAKTUR", "MONOSPACE", "TAG", "ENCLOSED",
+                "HEART", "ORNAMENT", "DINGBAT", "MODIFIER", "BRAILLE", "SYMBOL", "EMOJI"
+            ])
+            or 0x1F000 <= codepoint <= 0x1FAFF   # Emojis
+            or 0x13000 <= codepoint <= 0x1342F   # Hieroglyphs
+        ):
+            continue
+
+        clean.append(char)
+
+    text = ''.join(clean)
+    text = re.sub(r'[^\w\s.\-()\[\]–—\u0900-\u097F\u0A80-\u0AFF\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0D80-\u0DFF\u0E00-\u0E7F\u0A00-\u0A7F\u0980-\u09FF\u0A00-\u0A7F]', '', text)
+    text = re.sub(r'[_\s\-]+', ' ', text)
+
+    return text.strip()
+
 
 
 subprocess.run([
