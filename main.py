@@ -645,19 +645,23 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
 
 @bot.on_message(filters.command(["xtract"]))
 async def txt_handler(bot: Client, m: Message):
+    # ✅ Check if user is authorized
+    if m.from_user.id not in AUTH_USERS:
+        await m.reply_text("❌ You are not authorized to use this command. i Just Follow my Boss Commands Only 🫠")
+        return
+
     # Show instruction message
     editable = await m.reply_text(
-        "**🔹Hey Sir Just Send Me txt**\n"
-        "🔹Send me the .txt file and wait.\n\n"
-        "<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>"
+        "**👑 Hey Sir Just Send Me txt**\n"
+        "<blockquote><b>Just Send Me txt File & i will handle it automatically until its Done 😊</b></blockquote>"
     )
 
     try:
-        input: Message = await bot.listen(editable.chat.id, timeout=20)
+        input: Message = await bot.listen(editable.chat.id, timeout=50)
 
-        # Check if document exists
-        if not input.document:
-            await editable.edit("❌ <b>You didn't send a document!</b>\nPlease send a valid .txt file.")
+        # ✅ Check if document exists
+        if not input.document or not input.document.file_name.endswith(".txt"):
+            await editable.edit("❌ <b>You didn't send a valid .txt file!</b>\nPlease try again.")
             return
 
         # If the document is from a channel post, just forward it
@@ -737,7 +741,7 @@ async def txt_handler(bot: Client, m: Message):
     
     await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>🔹Img : {img_count}  🔹PDF : {pdf_count}\n🔹ZIP : {zip_count}  🔹Other : {other_count}</blockquote>\n🔹Send From where you want to download.**")
     try:
-        input0: Message = await bot.listen(editable.chat.id, timeout=20)
+        input0: Message = await bot.listen(editable.chat.id, timeout=30)
         raw_text = input0.text
         await input0.delete(True)
     except asyncio.TimeoutError:
@@ -751,7 +755,7 @@ async def txt_handler(bot: Client, m: Message):
     
     await editable.edit(f"**🔹Enter Batch Name or send /d for use default**")
     try:
-        input1: Message = await bot.listen(editable.chat.id, timeout=20)
+        input1: Message = await bot.listen(editable.chat.id, timeout=30)
         raw_text0 = input1.text
         await input1.delete(True)
     except asyncio.TimeoutError:
@@ -765,11 +769,11 @@ async def txt_handler(bot: Client, m: Message):
 
     await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈`🦋{CREDIT}🦋`⌋━━➣")
     try:
-        input2: Message = await bot.listen(editable.chat.id, timeout=20)
+        input2: Message = await bot.listen(editable.chat.id, timeout=10)
         raw_text2 = input2.text
         await input2.delete(True)
     except asyncio.TimeoutError:
-        raw_text2 = '480'
+        raw_text2 = '720'
     quality = f"{raw_text2}p"
     try:
         if raw_text2 == "144":
@@ -791,7 +795,7 @@ async def txt_handler(bot: Client, m: Message):
 
     await editable.edit(f"** Enter Your Name or send /d for use default sir**")
     try:
-        input3: Message = await bot.listen(editable.chat.id, timeout=20)
+        input3: Message = await bot.listen(editable.chat.id, timeout=10)
         raw_text3 = input3.text
         await input3.delete(True)
     except asyncio.TimeoutError:
@@ -804,7 +808,7 @@ async def txt_handler(bot: Client, m: Message):
 
     await editable.edit("**🔹Enter __PW/CP/CW__ Working Token For 𝐌𝐏𝐃 𝐔𝐑𝐋 or send /d**")
     try:
-        input4: Message = await bot.listen(editable.chat.id, timeout=20)
+        input4: Message = await bot.listen(editable.chat.id, timeout=30)
         raw_text4 = input4.text
         await input4.delete(True)
     except asyncio.TimeoutError:
