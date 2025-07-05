@@ -506,10 +506,21 @@ async def stop_handler(_, m: Message):
 
 @bot.on_message(filters.command("start") & (filters.private | filters.group | filters.channel))
 async def start(bot, m: Message):
-    user_name = m.sender_chat.title if m.chat.type == "channel" else m.from_user.first_name
+    # Support anonymous admins or channels
+    user_name = (
+        m.from_user.first_name if m.from_user
+        else m.sender_chat.title if m.sender_chat
+        else "User"
+    )
+    sender_id = (
+        m.from_user.id if m.from_user
+        else m.sender_chat.id if m.sender_chat
+        else m.chat.id
+    )
+
     start_message = await bot.send_message(
         m.chat.id,
-        f">Hey 👑 {user_name}! 💞\n\n"
+        f">Hey ✨ {user_name}! 👑\n\n"
     )
 
     await asyncio.sleep(1)
@@ -642,7 +653,8 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
             await sent.delete()
     except Exception as e:
         await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
-
+        
+@bot.on_message(filters.command(["xtract"]))
 async def txt_handler(bot: Client, m: Message):
     # ✅ Check if sender is authorized — handle anonymous admins (no `from_user`)
     sender_id = m.from_user.id if m.from_user else m.sender_chat.id if m.sender_chat else None
