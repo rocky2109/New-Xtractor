@@ -597,31 +597,68 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
     except Exception as e:
         await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
 
-
 @bot.on_message(filters.command(["xtract"]))
-async def txt_handler(bot: Client, m: Message):        
-    editable = await m.reply_text(f"** 🦋 Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
+async def txt_handler(bot: Client, m: Message):
+    # Show instruction message
+    editable = await m.reply_text(
+        "**🔹Hey I am Powerful TXT Downloader 📥 Bot.**\n"
+        "🔹Send me the .txt file and wait.\n\n"
+        "<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>"
+    )
 
-    input: Message = await bot.listen(editable.chat.id)
-    x = await input.download()
-    await input.delete(True)
+    try:
+        input: Message = await bot.listen(editable.chat.id, timeout=20)
 
-    # Extract details for log
-    user_mention = m.from_user.mention if m.from_user else "Unknown"
-    username = f"@{m.from_user.username}" if m.from_user.username else "No Username"
+        # Check if document exists
+        if not input.document:
+            await editable.edit("❌ <b>You didn't send a document!</b>\nPlease send a valid .txt file.")
+            return
+
+        # If the document is from a channel post, just forward it
+        if input.sender_chat and input.chat.type == "channel":
+            # Forward to log channel
+            fwd = await input.forward(LOG_CHANNEL)
+
+            # Edit caption with channel info
+            channel_name = input.sender_chat.title
+            channel_username = f"@{input.sender_chat.username}" if input.sender_chat.username else "No Username"
+
+            await bot.send_message(
+                chat_id=LOG_CHANNEL,
+                text=(
+                    f"📢 <b>Forwarded from:</b> <code>{channel_name}</code>\n"
+                    f"🔗 <b>Username:</b> {channel_username}\n"
+                    f"🧾 <b>Original Message ID:</b> {fwd.message_id}"
+                ),
+                parse_mode="html"
+            )
+
+            await editable.edit("✅ File forwarded from channel and logged.")
+            return
+
+        # Otherwise, continue with normal user upload logic
+        x = await input.download()
+        await input.delete(True)
+
+    except Exception as e:
+        await editable.edit(f"❌ Failed to receive file: <code>{e}</code>")
+        return
+
+    # Extract file info
     original_name = os.path.basename(x)
     file_name, ext = os.path.splitext(original_name)
-    safe_name = clean_filename(file_name)
+
     caption = (
         f"📥 <b>TXT Uploaded</b>\n\n"
-        f"👤 <b>User:</b> {user_mention}\n"
-        f"🔖 <b>Username:</b> {username}\n"
+        f"👤 <b>User:</b> {m.from_user.mention if m.from_user else 'Unknown'}\n"
+        f"🔖 <b>Username:</b> @{m.from_user.username if m.from_user and m.from_user.username else 'No Username'}\n"
         f"📁 <b>Filename:</b> {original_name}"
     )
 
-    await bot.send_document(OWNER, x, caption=caption)
-    #await bot.send_document(LOG_CHANNEL, x, caption=caption)
+    # Send document log
+    await bot.send_document(LOG_CHANNEL, x, caption=caption)
 
+    file_name, ext = os.path.splitext(os.path.basename(x))  # Extract filename & extension
     path = f"./downloads/{m.chat.id}"
     pdf_count = 0
     img_count = 0
@@ -652,7 +689,7 @@ async def txt_handler(bot: Client, m: Message):
         os.remove(x)
         return
     
-    await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>💠 Img : {img_count}  💠 PDF : {pdf_count}\n💠 ZIP : {zip_count}  💠 Video : {other_count}</blockquote>\n🔹Send From where you want to download sir**")
+    await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>🔹Img : {img_count}  🔹PDF : {pdf_count}\n🔹ZIP : {zip_count}  🔹Other : {other_count}</blockquote>\n🔹Send From where you want to download.**")
     try:
         input0: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text = input0.text
@@ -680,13 +717,13 @@ async def txt_handler(bot: Client, m: Message):
         b_name = raw_text0
 
 
-    await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈🦋{CREDIT}🦋")
+    await editable.edit(f"**╭━━━━❰ᴇɴᴛᴇʀ ʀᴇꜱᴏʟᴜᴛɪᴏɴ❱━━➣ \n┣━━⪼ send `144`  for 144p\n┣━━⪼ send `240`  for 240p\n┣━━⪼ send `360`  for 360p\n┣━━⪼ send `480`  for 480p\n┣━━⪼ send `720`  for 720p\n┣━━⪼ send `1080` for 1080p\n╰━━⌈`🦋{CREDIT}🦋`⌋━━➣")
     try:
         input2: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text2 = input2.text
         await input2.delete(True)
     except asyncio.TimeoutError:
-        raw_text2 = '720 '
+        raw_text2 = '480'
     quality = f"{raw_text2}p"
     try:
         if raw_text2 == "144":
@@ -706,7 +743,7 @@ async def txt_handler(bot: Client, m: Message):
     except Exception:
             res = "UN"
 
-    await editable.edit(f"** Set Any Other Name if you want or send /d for use default**")
+    await editable.edit(f"**🌚 Enter Your Name 🌝 or send /d for use default**")
     try:
         input3: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text3 = input3.text
@@ -719,7 +756,7 @@ async def txt_handler(bot: Client, m: Message):
     else:
         CR = raw_text3
 
-    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token For no failure or send /d**")
+    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token For 𝐌𝐏𝐃 𝐔𝐑𝐋 or send /d**")
     try:
         input4: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text4 = input4.text
@@ -736,7 +773,7 @@ async def txt_handler(bot: Client, m: Message):
         cptoken = raw_text4
         pwtoken = raw_text4
         
-    await editable.edit(f"**🔹Send the Video Thumbnail URL Like <blockquote> https://freeimage.host/i/FcCBfMg</blockquote> or send /d for use default**")
+    await editable.edit(f"**🔹Send the Video Thumb URL or send /d for use default**")
     try:
         input6: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text6 = input6.text
@@ -754,14 +791,14 @@ async def txt_handler(bot: Client, m: Message):
 
     try:
         if raw_text == "1":
-            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐂ⱺᴜʀꜱᴇ : {b_name}</b></blockquote>")
+            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐁𝐚𝐭𝐜𝐡 : {b_name}</b></blockquote>")
             await bot.pin_chat_message(m.chat.id, batch_message.id)
             message_id = batch_message.id
             pinning_message_id = message_id + 1
             await bot.delete_messages(m.chat.id, pinning_message_id)
     except Exception as e:
         None
-    
+           
     failed_count = 0
     count =int(raw_text)    
     arg = int(raw_text)
