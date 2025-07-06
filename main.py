@@ -520,7 +520,7 @@ async def start(bot, m: Message):
 
     start_message = await bot.send_message(
         m.chat.id,
-        f">Hey ✨ {user_name}! 👑\n\n"
+        f">Hey 💖 **{user_name}!** 👑\n\n"
     )
 
     await asyncio.sleep(1)
