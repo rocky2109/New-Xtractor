@@ -21,6 +21,15 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64decode
 
+
+async def delayed_delete(message, delay=5):
+    await asyncio.sleep(delay)
+    try:
+        await message.delete()
+    except:
+        pass  # Ignore if already deleted or error occurs
+
+
 def duration(filename):
     result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                              "format=duration", "-of",
@@ -296,6 +305,7 @@ async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
     subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:11 -vframes 1 "{filename}.jpg"', shell=True)
     await prog.delete (True)
     reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
+    asyncio.create_task(delayed_delete(reply))
     try:
         if thumb == "/d":
             thumbnail = f"{filename}.jpg"
@@ -314,8 +324,7 @@ async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
     except Exception:
         await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
     
-    finally:
-        await asyncio.sleep(5)
+    finally:        
         await reply.delete(True)
         os.remove(filename)
         os.remove(f"{filename}.jpg")
