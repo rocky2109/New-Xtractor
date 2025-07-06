@@ -293,7 +293,7 @@ async def download_and_decrypt_video(url, cmd, name, key):
             return None  
 
 async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
+    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:11 -vframes 1 "{filename}.jpg"', shell=True)
     await prog.delete (True)
     reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
     try:
@@ -314,6 +314,7 @@ async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
         await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
     
     finally:
+        await asyncio.sleep(5)
         await reply.delete(True)
         os.remove(filename)
         os.remove(f"{filename}.jpg")
