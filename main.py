@@ -670,7 +670,7 @@ async def txt_handler(bot: Client, m: Message):
     )
 
     try:
-        input: Message = await bot.listen(editable.chat.id, timeout=50)
+        input: Message = await bot.listen(editable.chat.id, timeout=250)
 
         # ✅ Check if document exists
         if not input.document or not input.document.file_name.endswith(".txt"):
