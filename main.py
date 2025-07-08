@@ -43,56 +43,23 @@ import unicodedata
 import re
 import unicodedata
 
-def clean_filename(text: str) -> str:
-    if not text:
-        return "file"
+import re
 
-    clean = []
-    for char in text:
-        name = unicodedata.name(char, "")
-        codepoint = ord(char)
+def clean_line(text: str) -> str:
+    # Normalize spacing
+    text = re.sub(r'\s+', ' ', text)
 
-        # ❌ Skip stylized/unwanted characters
-        if (
-            any(sub in name for sub in [
-                "MATHEMATICAL", "DOUBLE-STRUCK", "CIRCLED", "SQUARED", "FULLWIDTH", "BOLD",
-                "ITALIC", "SCRIPT", "BLACK", "FRAKTUR", "MONOSPACE", "TAG", "ENCLOSED",
-                "HEART", "ORNAMENT", "DINGBAT", "MODIFIER", "BRAILLE", "SYMBOL", "EMOJI"
-            ])
-            or 0x1F000 <= codepoint <= 0x1FAFF   # Emojis
-            or 0x13000 <= codepoint <= 0x1342F   # Hieroglyphs
-        ):
-            continue
+    # Remove exact [vip] tags (case-insensitive)
+    text = re.sub(r'\[vip\]', '', text, flags=re.IGNORECASE)
 
-        clean.append(char)
+    # Remove VIP anywhere surrounded by >, dashes, spaces, etc.
+    text = re.sub(r'[\s>:\-]*v[\W_]*i[\W_]*p[\s>:\-]*', ' ', text, flags=re.IGNORECASE)
 
-    # Join the kept characters
-    text = ''.join(clean)
-
-    # 🔴 Step 1: Remove "vip" and similar variations (case-insensitive)
-    text = re.sub(r'\bvip\b', '', text, flags=re.IGNORECASE)
-
-    # 🛡️ Step 2: Remove unwanted symbols (preserve Indian ranges)
-    text = re.sub(
-        r'[^\w\s.\-()\[\]–—'
-        r'\u0900-\u097F'  # Devanagari
-        r'\u0A80-\u0AFF'  # Gujarati
-        r'\u0B80-\u0BFF'  # Tamil
-        r'\u0C00-\u0C7F'  # Telugu
-        r'\u0C80-\u0CFF'  # Kannada
-        r'\u0D00-\u0D7F'  # Malayalam
-        r'\u0D80-\u0DFF'  # Sinhala
-        r'\u0980-\u09FF'  # Bengali
-        r']+', '', text
-    )
-
-    # Normalize multiple spaces/dashes/underscores
-    text = re.sub(r'[_\s\-]+', ' ', text)
-
-    # Remove trailing or leading dots, dashes, spaces
-    text = text.strip(".-_ ")
-
-    return text.strip()
+    # Remove duplicated or dangling > or spaces
+    text = re.sub(r'\s*>\s*', ' > ', text)       # normalize >
+    text = re.sub(r'(>\s*){2,}', '> ', text)     # remove repeated >
+    text = re.sub(r'\s{2,}', ' ', text)          # clean extra spaces
+    return text.strip(" >")
 
 
 
