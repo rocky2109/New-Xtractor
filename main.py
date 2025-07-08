@@ -69,7 +69,10 @@ def clean_filename(text: str) -> str:
     # Join the kept characters
     text = ''.join(clean)
 
-    # 🛡️ Remove unwanted symbols (preserve Indian ranges)
+    # 🔴 Step 1: Remove "vip" and similar variations (case-insensitive)
+    text = re.sub(r'\bvip\b', '', text, flags=re.IGNORECASE)
+
+    # 🛡️ Step 2: Remove unwanted symbols (preserve Indian ranges)
     text = re.sub(
         r'[^\w\s.\-()\[\]–—'
         r'\u0900-\u097F'  # Devanagari
@@ -87,9 +90,10 @@ def clean_filename(text: str) -> str:
     text = re.sub(r'[_\s\-]+', ' ', text)
 
     # Remove trailing or leading dots, dashes, spaces
-    text = text.strip(" .-_")
+    text = text.strip(".-_ ")
 
     return text.strip()
+
 
 
 
@@ -871,8 +875,8 @@ async def txt_handler(bot: Client, m: Message):
             url = "https://" + Vxy
             link0 = "https://" + Vxy
 
-            name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
-            name = f'{name1[:60]}'
+            name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").replace(" vip", "⚝" ).strip()
+            name = f'⚝ {name1[:90]}'
 
             
             if "visionias" in url:
