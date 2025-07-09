@@ -641,26 +641,23 @@ async def txt_handler(bot: Client, m: Message):
         return
 
     # ✅ Proceed if authorized
-editable = await m.reply_text(
+    editable = await m.reply_text(
         "**All Set Sir 🫡**\n"
-        "<blockquote><b>Just Send Me txt File & i will handle it automatically until its Done 😊</b></blockquote>"
+        "<blockquote><b>Just Send Me txt File & I will handle it automatically until it's done 😊</b></blockquote>"
     )
-
 
     try:
         input: Message = await bot.listen(editable.chat.id, timeout=250)
 
-        # ✅ Check if document exists
+        # ✅ Check if document exists and ends with .txt
         if not input.document or not input.document.file_name.endswith(".txt"):
-            await editable.edit("🫣 <b>You didn't send a valid .txt file!</b>\nPlease try again.")
+            await editable.edit("🫣 <b>You didn't send a valid .txt file!</b>\nPlease try again.", parse_mode="html")
             return
 
-        # If the document is from a channel post, just forward it
+        # ✅ If message came from a channel, log and forward only
         if input.sender_chat and input.chat.type == "channel":
-            # Forward to log channel
             fwd = await input.forward(LOG_CHANNEL)
 
-            # Edit caption with channel info
             channel_name = input.sender_chat.title
             channel_username = f"@{input.sender_chat.username}" if input.sender_chat.username else "No Username"
 
@@ -669,7 +666,7 @@ editable = await m.reply_text(
                 text=(
                     f"📢 <b>Forwarded from:</b> <code>{channel_name}</code>\n"
                     f"🔗 <b>Username:</b> {channel_username}\n"
-                    f"🧾 <b>Original Message ID:</b> {fwd.message_id}"
+                    f"🧾 <b>Original Message ID:</b> <code>{fwd.message_id}</code>"
                 ),
                 parse_mode="html"
             )
@@ -677,24 +674,13 @@ editable = await m.reply_text(
             await editable.edit("✅ File forwarded from channel and logged.")
             return
 
-        # Otherwise, continue with normal user upload logic
+        # ✅ Download file if normal user
         x = await input.download()
         await input.delete(True)
 
-    except Exception as e:
-        await editable.edit(f"❌ Failed to receive file: <code>{e}</code>")
-        return
+        await editable.edit("✅ TXT file received successfully. Starting extraction...")
 
-    # Extract file info
-    original_name = os.path.basename(x)
-    file_name, ext = os.path.splitext(original_name)
-
-    caption = (
-        f"📥 <b>TXT Uploaded</b>\n\n"
-        f"👤 <b>User:</b> {m.from_user.mention if m.from_user else 'Unknown'}\n"
-        f"🔖 <b>Username:</b> @{m.from_user.username if m.from_user and m.from_user.username else 'No Username'}\n"
-        f"📁 <b>Filename:</b> {original_name}"
-    )
+        # Proceed to the rest of your extraction logic...
 
     # Send document log
     await bot.send_document(LOG_CHANNEL, x, caption=caption)
