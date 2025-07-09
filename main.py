@@ -637,19 +637,13 @@ async def txt_handler(bot: Client, m: Message):
 
     # ❌ Deny if sender is not in AUTH_USERS
     if sender_id not in AUTH_USERS:
-        await m.reply_text(
-            "🚫 <b>Access Denied</b>\n"
-            "I only respond to authorized users or admins.\n"
-            f"🧾 Your ID: <code>{sender_id}</code>",
-            parse_mode="html"
-        )
+        await m.reply_text("❌ You are not authorized to use this command. I just follow my Boss's commands only 🫠")
         return
 
     # ✅ Proceed if authorized
-    editable = await m.reply_text(
-        "**🔹Hey I am Powerful TXT Downloader 📥 Bot.\n"
-        "🔹Send me the .txt file and wait.\n\n"
-        "<blockquote><b>🕒 Note:\nAll input must be given within 20 seconds.</b></blockquote>**"
+editable = await m.reply_text(
+        "**All Set Sir 🫡**\n"
+        "<blockquote><b>Just Send Me txt File & i will handle it automatically until its Done 😊</b></blockquote>"
     )
 
 
