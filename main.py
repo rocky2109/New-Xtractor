@@ -678,19 +678,35 @@ async def txt_handler(bot: Client, m: Message):
         x = await input.download()
         await input.delete(True)
 
+        # Prepare log caption
+        user_mention = m.from_user.mention if m.from_user else "Unknown"
+        username = f"@{m.from_user.username}" if m.from_user and m.from_user.username else "No Username"
+        original_name = os.path.basename(x)
+        caption = (
+            f"📥 <b>TXT Uploaded</b>\n\n"
+            f"👤 <b>User:</b> {user_mention}\n"
+            f"🔖 <b>Username:</b> {username}\n"
+            f"📁 <b>Filename:</b> {original_name}"
+        )
+
+        # Send to log
+        await bot.send_document(LOG_CHANNEL, x, caption=caption)
+
+        # Continue with processing
         await editable.edit("✅ TXT file received successfully. Starting extraction...")
 
-        # Proceed to the rest of your extraction logic...
+        file_name, ext = os.path.splitext(original_name)
+        path = f"./downloads/{m.chat.id}"
+        pdf_count = 0
+        img_count = 0
+        zip_count = 0
+        other_count = 0
 
-    # Send document log
-    await bot.send_document(LOG_CHANNEL, x, caption=caption)
+        # You can now proceed with your extraction logic...
 
-    file_name, ext = os.path.splitext(os.path.basename(x))  # Extract filename & extension
-    path = f"./downloads/{m.chat.id}"
-    pdf_count = 0
-    img_count = 0
-    zip_count = 0
-    other_count = 0
+    except Exception as e:
+        await editable.edit(f"❌ Failed to receive file:\n<code>{e}</code>", parse_mode="html")
+
     
     try:    
         with open(x, "r") as f:
