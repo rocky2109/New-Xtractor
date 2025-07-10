@@ -614,68 +614,30 @@ async def txt_handler(client: Client, m: Message):
         f"> ➠ 𝐌𝐚𝐝𝐞 𝐁𝐲 : {CREDIT} 💻\n"
         )
     )                    
-          
-@bot.on_message(filters.command(["xtract"]))
-async def txt_handler(bot: Client, m: Message):
-    sender_id = m.from_user.id if m.from_user else m.sender_chat.id if m.sender_chat else None
 
-    if str(sender_id) not in AUTH_USERS and str(sender_id) not in CHANNELS:
-        await m.reply_text("❌ You are not authorized to use this command.\nOnly my Boss or Allowed Channels can do this 😌")
-        return
-    # ✅ Proceed if authorized
-    editable = await m.reply_text(
-        "**All Set Boss 🫡**\n"
-        "<blockquote><b>Just Send Me txt File & I will handle it automatically until it's done 😊</b></blockquote>"
+@bot.on_message(filters.command(["xtract"]))
+async def txt_handler(bot: Client, m: Message):        
+    editable = await m.reply_text(f"**🔹Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
+
+    input: Message = await bot.listen(editable.chat.id)
+    x = await input.download()
+    await input.delete(True)
+
+    # Extract details for log
+    user_mention = m.from_user.mention if m.from_user else "Unknown"
+    username = f"@{m.from_user.username}" if m.from_user.username else "No Username"
+    original_name = os.path.basename(x)
+    file_name, ext = os.path.splitext(original_name)
+    safe_name = clean_filename(file_name)
+    caption = (
+        f"📥 <b>TXT Uploaded</b>\n\n"
+        f"👤 <b>User:</b> {user_mention}\n"
+        f"🔖 <b>Username:</b> {username}\n"
+        f"📁 <b>Filename:</b> {original_name}"
     )
 
-    try:
-        input: Message = await bot.listen(editable.chat.id, timeout=250)
-
-        # ✅ Check if document exists and ends with .txt
-        if not input.document or not input.document.file_name.endswith(".txt"):
-            await editable.edit("🫣 <b>You didn't send a valid .txt file!</b>\nPlease try again.", parse_mode="html")
-            return
-
-        # ✅ If message came from a channel, log and forward only
-        if input.sender_chat and input.chat.type == "channel":
-            fwd = await input.forward(LOG_CHANNEL)
-
-            channel_name = input.sender_chat.title
-            channel_username = f"@{input.sender_chat.username}" if input.sender_chat.username else "No Username"
-
-            await bot.send_message(
-                chat_id=LOG_CHANNEL,
-                text=(
-                    f"📢 <b>Forwarded from:</b> <code>{channel_name}</code>\n"
-                    f"🔗 <b>Username:</b> {channel_username}\n"
-                    f"🧾 <b>Original Message ID:</b> <code>{fwd.message_id}</code>"
-                ),
-                parse_mode="html"
-            )
-
-            await editable.edit("✅ File forwarded from channel and logged.")
-            return
-
-        # ✅ Download file if normal user
-        x = await input.download()
-        await input.delete(True)
-
-        # Prepare log caption
-        user_mention = m.from_user.mention if m.from_user else "Unknown"
-        username = f"@{m.from_user.username}" if m.from_user and m.from_user.username else "No Username"
-        original_name = os.path.basename(x)
-        caption = (
-            f"📥 <b>TXT Uploaded</b>\n\n"
-            f"👤 <b>User:</b> {user_mention}\n"
-            f"🔖 <b>Username:</b> {username}\n"
-            f"📁 <b>Filename:</b> {original_name}"
-        )
-
-        # Send to log
-        await bot.send_document(LOG_CHANNEL, x, caption=caption)
-
-        # Continue with processing
-        await editable.edit("✅ TXT file received successfully. Starting extraction...")
+   # await bot.send_document(OWNER, x, caption=caption)
+    await bot.send_document(LOG_CHANNEL, x, caption=caption)
 
         file_name, ext = os.path.splitext(original_name)
         path = f"./downloads/{m.chat.id}"
