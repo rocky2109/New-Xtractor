@@ -615,29 +615,19 @@ async def txt_handler(client: Client, m: Message):
         )
     )                    
           
-@bot.on_message(filters.command(["logs"]))
-async def send_logs(client: Client, m: Message):  # Correct parameter name
-    try:
-        with open("logs.txt", "rb") as file:
-            sent = await m.reply_text("**📤 Sending you ....**")
-            await m.reply_document(document=file)
-            await sent.delete()
-    except Exception as e:
-        await m.reply_text(f"Error sending logs:\n<blockquote>{e}</blockquote>")
-        
 @bot.on_message(filters.command(["xtract"]))
 async def txt_handler(bot: Client, m: Message):
-    # ✅ Determine sender ID (works for users and channels)
+    # ✅ Determine sender ID (for users, channels, anonymous admins)
     if m.from_user:
         sender_id = m.from_user.id
-    elif m.sender_chat:  # anonymous admin or channel
+    elif m.sender_chat:  # anonymous admin or channel post
         sender_id = m.sender_chat.id
     else:
-        sender_id = None  # fallback
+        sender_id = None
 
-    # ❌ Deny if sender is not in AUTH_USERS
-    if sender_id not in AUTH_USERS:
-        await m.reply_text("❌ You are not authorized to use this command. I just follow my Boss's commands only 🫠")
+    # ✅ Authorize if in AUTH_USERS or CHANNELS
+    if sender_id not in AUTH_USERS and sender_id not in CHANNELS:
+        await m.reply_text("❌ You are not authorized to use this command.\nOnly my Boss or Allowed Channels can do this 😌")
         return
 
     # ✅ Proceed if authorized
