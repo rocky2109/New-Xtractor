@@ -617,22 +617,14 @@ async def txt_handler(client: Client, m: Message):
           
 @bot.on_message(filters.command(["xtract"]))
 async def txt_handler(bot: Client, m: Message):
-    # ✅ Determine sender ID (for users, channels, anonymous admins)
-    if m.from_user:
-        sender_id = m.from_user.id
-    elif m.sender_chat:  # anonymous admin or channel post
-        sender_id = m.sender_chat.id
-    else:
-        sender_id = None
+    sender_id = m.from_user.id if m.from_user else m.sender_chat.id if m.sender_chat else None
 
-    # ✅ Authorize if in AUTH_USERS or CHANNELS
-    if sender_id not in AUTH_USERS and sender_id not in CHANNELS:
+    if str(sender_id) not in AUTH_USERS and str(sender_id) not in CHANNELS:
         await m.reply_text("❌ You are not authorized to use this command.\nOnly my Boss or Allowed Channels can do this 😌")
         return
-
     # ✅ Proceed if authorized
     editable = await m.reply_text(
-        "**All Set Sir 🫡**\n"
+        "**All Set Boss 🫡**\n"
         "<blockquote><b>Just Send Me txt File & I will handle it automatically until it's done 😊</b></blockquote>"
     )
 
