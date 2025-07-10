@@ -639,17 +639,11 @@ async def txt_handler(bot: Client, m: Message):
    # await bot.send_document(OWNER, x, caption=caption)
     await bot.send_document(LOG_CHANNEL, x, caption=caption)
 
-        
-        path = f"./downloads/{m.chat.id}"
-        pdf_count = 0
-        img_count = 0
-        zip_count = 0
-        other_count = 0
-
-        # You can now proceed with your extraction logic...
-
-    except Exception as e:
-        await editable.edit(f"❌ Failed to receive file:\n<code>{e}</code>", parse_mode="html")
+    path = f"./downloads/{m.chat.id}"
+    pdf_count = 0
+    img_count = 0
+    zip_count = 0
+    other_count = 0
 
     
     try:    
