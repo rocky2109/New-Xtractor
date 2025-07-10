@@ -294,50 +294,28 @@ async def download_and_decrypt_video(url, cmd, name, key):
             return None  
 
 
-async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
+async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
+    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
+    await prog.delete (True)
+    reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
     try:
-        # Generate thumbnail using ffmpeg
-        subprocess.run(
-            f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
-            shell=True
-        )
-
-        # Delete progress message
-        await prog.delete(True)
-
-        # Send intermediate message
-        reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
-        await asyncio.sleep(5)
-        await reply.delete()
-
-        # Determine thumbnail
-        thumbnail = f"{filename}.jpg" if thumb == "/d" else thumb
-
-        # Duration for video
-        dur = int(duration(filename))
-        start_time = time.time()
-
-        # Always send as spoiler video
-        await m.reply_video(
-            video=filename,
-            caption=cc,
-            supports_streaming=True,
-            height=720,
-            width=1280,
-            thumb=thumbnail,
-            duration=dur,
-            progress=progress_bar,
-            progress_args=(m, start_time),
-            has_spoiler=True  # 🔥 SPOILER enabled
-        )
-
+        if thumb == "/d":
+            thumbnail = f"{filename}.jpg"
+        else:
+            thumbnail = thumb
+            
     except Exception as e:
-        await m.reply_text(f"❌ Failed to upload video:\n<code>{e}</code>", parse_mode="html")
+        await m.reply_text(str(e))
+      
+    dur = int(duration(filename))
+    start_time = time.time()
 
+    try:
+        await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))
+    except Exception:
+        await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
+    
     finally:
-        # Safe cleanup
-        if os.path.exists(filename):
-            os.remove(filename)
-        if os.path.exists(f"{filename}.jpg"):
-            os.remove(f"{filename}.jpg")
-
+        await reply.delete(True)
+        os.remove(filename)
+        os.remove(f"{filename}.jpg")
