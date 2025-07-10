@@ -639,7 +639,7 @@ async def txt_handler(bot: Client, m: Message):
    # await bot.send_document(OWNER, x, caption=caption)
     await bot.send_document(LOG_CHANNEL, x, caption=caption)
 
-        file_name, ext = os.path.splitext(original_name)
+        
         path = f"./downloads/{m.chat.id}"
         pdf_count = 0
         img_count = 0
