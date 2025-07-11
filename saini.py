@@ -350,7 +350,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
         )
 
     except Exception as e:
-        await m.reply_text(f"❌ Failed to upload video:\n<code>{e}</code>" Error")
+        await m.reply_text(f"❌ Failed to upload video:\n<code>{e}</code>")
 
     finally:
         # Safe cleanup
