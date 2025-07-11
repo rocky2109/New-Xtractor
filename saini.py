@@ -125,63 +125,75 @@ def vid_info(info):
                 pass
     return new_info
 
+import subprocess
+import os
+from pathlib import Path
 
 async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name, quality="720"):
     try:
         output_path = Path(output_path)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        cmd1 = f'yt-dlp -f "bv[height<={quality}]+ba/b" -o "{output_path}/file.%(ext)s" --allow-unplayable-format --no-check-certificate --external-downloader aria2c "{mpd_url}"'
-        print(f"Running command: {cmd1}")
-        os.system(cmd1)
-        
-        avDir = list(output_path.iterdir())
-        print(f"Downloaded files: {avDir}")
-        print("Decrypting")
+        # Step 1: Download using yt-dlp + aria2c
+        download_cmd = [
+            "yt-dlp",
+            "-f", f"bv[height<={quality}]+ba/b",
+            "-o", f"{output_path}/file.%(ext)s",
+            "--allow-unplayable-format",
+            "--no-check-certificate",
+            "--external-downloader", "aria2c",
+            mpd_url
+        ]
+        print(f"[⬇️] Running download command: {' '.join(download_cmd)}")
+        subprocess.run(download_cmd, check=True)
 
-        video_decrypted = False
-        audio_decrypted = False
-
-        for data in avDir:
-            if data.suffix == ".mp4" and not video_decrypted:
-                cmd2 = f'mp4decrypt {keys_string} --show-progress "{data}" "{output_path}/video.mp4"'
-                print(f"Running command: {cmd2}")
-                os.system(cmd2)
-                if (output_path / "video.mp4").exists():
-                    video_decrypted = True
-                data.unlink()
-            elif data.suffix == ".m4a" and not audio_decrypted:
-                cmd3 = f'mp4decrypt {keys_string} --show-progress "{data}" "{output_path}/audio.m4a"'
-                print(f"Running command: {cmd3}")
-                os.system(cmd3)
-                if (output_path / "audio.m4a").exists():
-                    audio_decrypted = True
-                data.unlink()
+        # Step 2: Decrypt audio and video
+        video_decrypted, audio_decrypted = False, False
+        for file in output_path.iterdir():
+            if file.suffix == ".mp4" and not video_decrypted:
+                video_decrypt_cmd = f'mp4decrypt {keys_string} --show-progress "{file}" "{output_path}/video.mp4"'
+                print(f"[🔐] Video decryption: {video_decrypt_cmd}")
+                subprocess.run(video_decrypt_cmd, shell=True, check=True)
+                file.unlink(missing_ok=True)
+                video_decrypted = (output_path / "video.mp4").exists()
+            elif file.suffix == ".m4a" and not audio_decrypted:
+                audio_decrypt_cmd = f'mp4decrypt {keys_string} --show-progress "{file}" "{output_path}/audio.m4a"'
+                print(f"[🔐] Audio decryption: {audio_decrypt_cmd}")
+                subprocess.run(audio_decrypt_cmd, shell=True, check=True)
+                file.unlink(missing_ok=True)
+                audio_decrypted = (output_path / "audio.m4a").exists()
 
         if not video_decrypted or not audio_decrypted:
-            raise FileNotFoundError("Decryption failed: video or audio file not found.")
+            raise FileNotFoundError("🔻 Decryption failed: video or audio not found.")
 
-        cmd4 = f'ffmpeg -i "{output_path}/video.mp4" -i "{output_path}/audio.m4a" -c copy "{output_path}/{output_name}.mp4"'
-        print(f"Running command: {cmd4}")
-        os.system(cmd4)
-        if (output_path / "video.mp4").exists():
-            (output_path / "video.mp4").unlink()
-        if (output_path / "audio.m4a").exists():
-            (output_path / "audio.m4a").unlink()
-        
-        filename = output_path / f"{output_name}.mp4"
+        # Step 3: Merge
+        merge_cmd = [
+            "ffmpeg", "-i", f"{output_path}/video.mp4", "-i", f"{output_path}/audio.m4a",
+            "-c", "copy", f"{output_path}/{output_name}.mp4"
+        ]
+        print(f"[🛠️] Merging: {' '.join(merge_cmd)}")
+        subprocess.run(merge_cmd, check=True)
 
-        if not filename.exists():
-            raise FileNotFoundError("Merged video file not found.")
+        # Cleanup decrypted temp files
+        (output_path / "video.mp4").unlink(missing_ok=True)
+        (output_path / "audio.m4a").unlink(missing_ok=True)
 
-        cmd5 = f'ffmpeg -i "{filename}" 2>&1 | grep "Duration"'
-        duration_info = os.popen(cmd5).read()
-        print(f"Duration info: {duration_info}")
+        final_file = output_path / f"{output_name}.mp4"
+        if not final_file.exists():
+            raise FileNotFoundError("❌ Merged video file not found!")
 
-        return str(filename)
+        # Optional: Log duration (for debug/logging)
+        duration_cmd = f'ffmpeg -i "{final_file}" 2>&1 | grep "Duration"'
+        duration_info = os.popen(duration_cmd).read()
+        print(f"[⏱️] Duration Info: {duration_info.strip()}")
 
+        return str(final_file)
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Subprocess error: {e}")
+        raise
     except Exception as e:
-        print(f"Error during decryption and merging: {str(e)}")
+        print(f"❌ General error during decryption & merge: {str(e)}")
         raise
 
 async def run(cmd):
@@ -292,28 +304,49 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
-    await prog.delete (True)
-    reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
+async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
     try:
-        if thumb == "/d":
-            thumbnail = f"{filename}.jpg"
-        else:
-            thumbnail = thumb
-            
-    except Exception as e:
-        await m.reply_text(str(e))
-      
-    dur = int(duration(filename))
-    start_time = time.time()
+        # Generate thumbnail using ffmpeg
+        subprocess.run(
+            f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
+            shell=True
+        )
 
-    try:
-        await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))
-    except Exception:
-        await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
-    
+        # Delete progress message
+        await prog.delete(True)
+
+        # Send intermediate message
+        reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
+        await asyncio.sleep(5)
+        await reply.delete()
+
+        # Determine thumbnail
+        thumbnail = f"{filename}.jpg" if thumb == "/d" else thumb
+
+        # Duration for video
+        dur = int(duration(filename))
+        start_time = time.time()
+
+        # Always send as spoiler video
+        await m.reply_video(
+            video=filename,
+            caption=cc,
+            supports_streaming=True,
+            height=720,
+            width=1280,
+            thumb=thumbnail,
+            duration=dur,
+            progress=progress_bar,
+            progress_args=(m, start_time),
+            has_spoiler=True  # 🔥 SPOILER enabled
+        )
+
+    except Exception as e:
+        await m.reply_text(f"❌ Failed to upload video:\n<code>{e}</code>", parse_mode="html")
+
     finally:
-        await reply.delete(True)
-        os.remove(filename)
-        os.remove(f"{filename}.jpg")
+        # Safe cleanup
+        if os.path.exists(filename):
+            os.remove(filename)
+        if os.path.exists(f"{filename}.jpg"):
+            os.remove(f"{filename}.jpg")
