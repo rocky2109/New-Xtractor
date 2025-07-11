@@ -491,40 +491,40 @@ async def start(bot, m: Message):
 
     start_message = await bot.send_message(
         m.chat.id,
-        f">Hey 💖 **{user_name}!** 👑\n\n"
+        f">**Hey 💖 {user_name}!** 👑\n\n"
     )
 
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f">🦋 Welcome {user_name}! 🦋\n\n" +
+        f">**🦋 Welcome {user_name}!** 🦋\n\n" +
         f"Initializing Uploader bot... 🤖\n\n"
         f"Progress:\n 🤍🤍🤍🤍🤍🤍🤍🤍🤍🤍 0%\n\n"
     )
 
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f">🦋 Welcome {user_name}! 🦋\n\n" +
+        f">🦋** Welcome {user_name}!**🦋\n\n" +
         f"Loading features... ⏳\n\n"
         f"Progress:\n ❤️❤️❤️🤍🤍🤍🤍🤍🤍🤍 25%\n\n"
     )
     
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f"> 🦋 Welcome {user_name}! 🦋\n\n" +
+        f"> 🦋 ** Welcome {user_name}!** 🦋\n\n" +
         f"This may take a moment 😉\n\n"
         f"Progress:\n 🧡🧡🧡🧡🧡🤍🤍🤍🤍🤍 50%\n\n"
     )
 
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f">🦋 Welcome {user_name}! 🦋\n\n" +
+        f">🦋 **Welcome {user_name}!** 🦋\n\n" +
         f"Checking subscription status... 🔍\n\n"
         f"Progress:\n 💛💛💛💛💛💛💛💛🤍🤍 75%\n\n"
     )
 
     await asyncio.sleep(1)
     await start_message.edit_text(
-        f">🦋 Welcome {user_name}! 🦋\n\n" +
+        f">🦋 **Welcome {user_name}!** 🦋\n\n" +
         f"Verifying access... 🔓\n\n"
         f"Progress:\n 💚💚💚💚💚💚💚💚💚💚 100%\n\n"
     )
@@ -533,7 +533,7 @@ async def start(bot, m: Message):
     await asyncio.sleep(2)
     if m.chat.id in AUTH_USERS:
         await start_message.edit_text(
-            f">👑 Hey {m.from_user.first_name}! \n\n"
+            f">👑 **Hey {m.from_user.first_name}!** \n\n"
             f"💎 You are an <b>Authorized User Cutie</b> 😘\n\n"
             f"➠ Use /xtract to extract from .txt (Auto 🚀)\n\n"
             f"➠ Use /help for full guide 📖\n\n"
@@ -765,7 +765,7 @@ async def txt_handler(bot: Client, m: Message):
 
     try:
         if raw_text == "1":
-            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐁𝐚𝐭𝐜𝐡 : {b_name}</b></blockquote>")
+            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐁𝐚𝐭𝐜𝐡 : 𖣐 {b_name} ⚝</b></blockquote>")
             await bot.pin_chat_message(m.chat.id, batch_message.id)
             message_id = batch_message.id
             pinning_message_id = message_id + 1
@@ -1103,7 +1103,7 @@ async def txt_handler(bot: Client, m: Message):
         await m.reply_text(e)
         time.sleep(2)
 
-    await m.reply_text(f"<blockquote>😘 𝗖ꪮ𝗺𝗽𝗹𝗲𝘁𝗲 𝗛ꪮ 𝗚𝗮𝘆𝗮 𝗕ꪮ$$ 😎</blockquote>")
+    await m.reply_text(f"<blockquote>✅ 𝗖ꪮ𝗺𝗽𝗹𝗲𝘁𝗲 𝗛ꪮ 𝗚𝗮𝘆𝗮 𝗕ꪮ$$ 😎</blockquote>")
 
 @bot.on_message(filters.text & filters.private)
 async def text_handler(bot: Client, m: Message):
