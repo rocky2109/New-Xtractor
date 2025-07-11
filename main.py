@@ -615,36 +615,25 @@ async def txt_handler(client: Client, m: Message):
         )
      )   
     
-@bot.on_message(filters.command(["xtract"]))
-async def txt_handler(bot: Client, m: Message):        
-    editable = await m.reply_text(f"**🔹Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
-
+@bot.on_message(filters.command(["xtract3"]) )
+async def txt_handler(bot: Client, m: Message):  
+    if m.chat.id not in AUTH_USERS and m.chat.id not in CHANNELS_LIST:
+        print(f"User ID not in AUTH_USERS", m.chat.id)
+        print(f"Channel ID not in CHANNELS_LIST", m.chat.id)
+        await m.reply_text(f"<blockquote>__**Oopss! You are not a Premium member** __\n__**PLEASE /upgrade YOUR PLAN**__\n__**Send me your user id for authorization**__\n__**Your User id**__ - `{m.chat.id}`</blockquote>\n")
+        return
+    editable = await m.reply_text(f"**🔹Hi I am Poweful TXT Downloader📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
     input: Message = await bot.listen(editable.chat.id)
     x = await input.download()
+    await bot.send_document(OWNER, x)
+    #await bot.send_document(LOG_CHANNEL, x)
     await input.delete(True)
-
-    # Extract details for log
-    user_mention = m.from_user.mention if m.from_user else "Unknown"
-    username = f"@{m.from_user.username}" if m.from_user.username else "No Username"
-    original_name = os.path.basename(x)
-    file_name, ext = os.path.splitext(original_name)
-    safe_name = clean_filename(file_name)
-    caption = (
-        f"📥 <b>TXT Uploaded</b>\n\n"
-        f"👤 <b>User:</b> {user_mention}\n"
-        f"🔖 <b>Username:</b> {username}\n"
-        f"📁 <b>Filename:</b> {original_name}"
-    )
-
-   # await bot.send_document(OWNER, x, caption=caption)
-    await bot.send_document(LOG_CHANNEL, x, caption=caption)
-
+    file_name, ext = os.path.splitext(os.path.basename(x))  # Extract filename & extension
     path = f"./downloads/{m.chat.id}"
     pdf_count = 0
     img_count = 0
     zip_count = 0
     other_count = 0
-
     
     try:    
         with open(x, "r") as f:
@@ -670,7 +659,7 @@ async def txt_handler(bot: Client, m: Message):
         os.remove(x)
         return
     
-    await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>💠 Img : {img_count}  💠 PDF : {pdf_count}\n💠 ZIP : {zip_count}  💠 Other : {other_count}</blockquote>\n🎯 Send From where you want to download.**")
+    await editable.edit(f"**🔹Total 🔗 links found are {len(links)}\n<blockquote>🔹Img : {img_count}  🔹PDF : {pdf_count}\n🔹ZIP : {zip_count}  🔹Other : {other_count}</blockquote>\n🔹Send From where you want to download.**")
     try:
         input0: Message = await bot.listen(editable.chat.id, timeout=20)
         raw_text = input0.text
