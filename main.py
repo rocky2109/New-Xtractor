@@ -616,9 +616,14 @@ async def txt_handler(client: Client, m: Message):
     )                    
 
 @bot.on_message(filters.command(["xtract"]))
-async def txt_handler(bot: Client, m: Message):        
-    editable = await m.reply_text(f"**🔹Hey I am Poweful TXT Downloader 📥 Bot.\n🔹Send me the txt file and wait.\n\n<blockquote><b>𝗡𝗼𝘁𝗲:\nAll input must be given in 20 sec</b></blockquote>**")
+async def txt_handler(bot: Client, m: Message):
+    # ✅ Check if sender is authorized — handle anonymous admins (no from_user)
+    sender_id = m.from_user.id if m.from_user else m.sender_chat.id if m.sender_chat else None
 
+    if sender_id not in AUTH_USERS:
+        await m.reply_text("❌ You are not authorized to use this command. I just follow my Boss's commands only 🫠")
+        return
+        
     input: Message = await bot.listen(editable.chat.id)
     x = await input.download()
     await input.delete(True)
