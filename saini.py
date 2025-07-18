@@ -293,15 +293,9 @@ async def download_and_decrypt_video(url, cmd, name, key):
             return None  
 
 async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:11 -vframes 1 "{filename}.jpg"', shell=True)
-    
-    await prog.delete(True)
-    reply = await m.reply_text(
-        f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>"
-    )
-    await asyncio.sleep(3)
-    await reply.delete(True)
-
+    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
+    await prog.delete (True)
+    reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
     try:
         if thumb == "/d":
             thumbnail = f"{filename}.jpg"
@@ -315,7 +309,7 @@ async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
     start_time = time.time()
 
     try:
-        await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time), has_spoiler=True)
+        await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))
     except Exception:
         await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
     
