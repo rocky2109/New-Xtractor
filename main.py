@@ -533,6 +533,7 @@ async def start(bot, m: Message):
     await asyncio.sleep(2)
     if m.chat.id in AUTH_USERS:
         await start_message.edit_text(
+            f"✅ Access Granted 😉\n\n"
             f">👑 **Hey {m.from_user.first_name}!** \n\n"
             f"💎 You are an <b>Authorized User Cutie</b> 😘\n\n"
             f"➠ Use /xtract to extract from .txt (Auto 🚀)\n\n"
