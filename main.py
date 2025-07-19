@@ -1184,6 +1184,23 @@ async def text_handler(bot: Client, m: Message):
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
+
+            elif "classplusapp.com/drm/" in url:
+                url = f"https://drmapijion-botupdatevip.vercel.app/api?url={url}&token={raw_text4}"
+
+                if ".mpd" in url:
+                    mpd = url
+        # process DASH stream here
+                    keys_string = " ".join([f"--key {key}" for key in keys])
+        # Example: await download_dash(mpd, keys_string)
+
+                elif ".m3u8" in url:
+                    m3u8 = url
+        # process HLS stream here
+                    keys_string = " ".join([f"--key {key}" for key in keys])
+        # Example: await download_hls(m3u8, keys_string)
+
+
             elif "tencdn.classplusapp" in url:
                 headers = {'host': 'api.classplusapp.com', 'x-access-token': f'{raw_text4}', 'accept-language': 'EN', 'api-version': '18', 'app-version': '1.4.73.2', 'build-number': '35', 'connection': 'Keep-Alive', 'content-type': 'application/json', 'device-details': 'Xiaomi_Redmi 7_SDK-32', 'device-id': 'c28d3cb16bbdac01', 'region': 'IN', 'user-agent': 'Mobile-Android', 'webengage-luid': '00000187-6fe4-5d41-a530-26186858be4c', 'accept-encoding': 'gzip'}
                 params = {"url": f"{url}"}
