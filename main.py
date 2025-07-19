@@ -1368,4 +1368,18 @@ async def text_handler(bot: Client, m: Message):
 
 
 
+def notify_owner():
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    data = {
+        "chat_id": OWNER,
+        "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲 ✅"
+    }
+    requests.post(url, data=data)
+
+
+if __name__ == "__main__":
+    reset_and_set_commands()
+    notify_owner() 
+
+
 bot.run()
