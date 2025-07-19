@@ -1378,7 +1378,7 @@ def notify_owner():
 
 
 if __name__ == "__main__":
-    reset_and_set_commands()
+    
     notify_owner() 
 
 
