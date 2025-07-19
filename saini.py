@@ -293,18 +293,10 @@ async def download_and_decrypt_video(url, cmd, name, key):
             return None  
 
 async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
-    # Generate thumbnail
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
-
-    # Delete progress message and show thumbnail generation message
+    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:11 -vframes 1 "{filename}.jpg"', shell=True)
     await prog.delete(True)
-    reply = await m.reply_text(
-        f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>"
-    )
-    await asyncio.sleep(3)
-    await reply.delete(True)
-
-    # Use custom or generated thumbnail
+    reply = await m.reply_text(f"<b>Generate Thumbnail:</b>\n<blockquote><b>{name}</b></blockquote>")
+    
     try:
         if thumb == "/d":
             thumbnail = f"{filename}.jpg"
@@ -312,13 +304,12 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
             thumbnail = thumb
     except Exception as e:
         await m.reply_text(str(e))
-        return  # prevent continuation if thumbnail assignment fails
+        return
 
     dur = int(duration(filename))
     start_time = time.time()
 
     try:
-        # Send video with spoiler
         await m.reply_video(
             filename,
             caption=cc,
@@ -329,20 +320,21 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
             duration=dur,
             has_spoiler=True,
             progress=progress_bar,
-            progress_args=(m, start_time)
+            progress_args=(reply, start_time)
         )
     except Exception:
-        # Fallback to sending as document, also with spoiler
         await m.reply_document(
             filename,
             caption=cc,
             thumb=thumbnail,
             progress=progress_bar,
-            progress_args=(m, start_time)
+            progress_args=(reply, start_time)
         )
+    
     finally:
-        # Cleanup files
+        await reply.delete(True)
         if os.path.exists(filename):
             os.remove(filename)
         if os.path.exists(f"{filename}.jpg"):
             os.remove(f"{filename}.jpg")
+
