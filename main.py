@@ -434,61 +434,6 @@ async def getcookies_handler(client: Client, m: Message):
     except Exception as e:
         await m.reply_text(f"**Failed Reason:\n<blockquote>{str(e)}</blockquote>**")
 
-@bot.on_message(filters.command(["ytm"]))
-async def txt_handler(bot: Client, m: Message):
-    global processing_request, cancel_requested
-    processing_request = True
-    cancel_requested = False
-
-    editable = await m.reply_text(
-        "__**Input Type**__\n\n<blockquote><b>01 •Send me the .txt file containing YouTube links\n02 •Send Single link or Set of YouTube multiple links</b></blockquote>"
-    )
-
-    input: Message = await bot.listen(editable.chat.id)
-
-    links = []
-    playlist_name = "YouTube Music"
-
-    if input.document and input.document.file_name.endswith(".txt"):
-        x = await input.download()
-        file_name, _ = os.path.splitext(os.path.basename(x))
-        playlist_name = file_name.replace('_', ' ')
-        try:
-            with open(x, "r", encoding="utf-8") as f:
-                content = f.read().splitlines()
-                links = [line.strip() for line in content if line.strip().startswith("http")]
-            os.remove(x)
-        except Exception as e:
-            await m.reply_text(f"**Invalid file input.**\nError: `{e}`")
-            return
-
-        await editable.edit(
-            f"**• ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ: __{len(links)}__**\n•sᴇɴᴅ sᴛᴀʀᴛ ɴᴜᴍʙᴇʀ (e.g. 1)"
-        )
-        try:
-            input0: Message = await bot.listen(editable.chat.id, timeout=20)
-            raw_text = input0.text.strip()
-            await input0.delete(True)
-        except asyncio.TimeoutError:
-            raw_text = '1'
-
-        await editable.delete()
-        try:
-            arg = int(raw_text)
-        except:
-            arg = 1
-        count = arg
-
-        try:
-            if arg == 1:
-                playlist_message = await m.reply_text(
-                    f"<blockquote><b>⏯️ Playlist : {playlist_name}</b></blockquote>"
-                )
-                await bot.pin_chat_message(m.chat.id, playlist_message.id)
-        except:
-            pass
-
-m_file_path= "main.py"
 
 @bot.on_message(filters.command(["ytm"]))
 async def txt_handler(bot: Client, m: Message):
@@ -553,7 +498,7 @@ async def txt_handler(bot: Client, m: Message):
         try:
             if arg == 1:
                 playlist_message = await m.reply_text(
-                    f"<blockquote><b>⏯️ Playlist : {playlist_name}</b></blockquote>"
+                    f"<blockquote><b>🎶 Playlist : {playlist_name}</b></blockquote>"
                 )
                 await bot.pin_chat_message(m.chat.id, playlist_message.id)
         except Exception:
