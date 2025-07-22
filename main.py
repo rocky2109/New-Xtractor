@@ -1422,7 +1422,7 @@ def notify_owner():
     for user_id in all_users:
         data = {
             "chat_id": user_id,
-            "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n <b>You Are Authorized Cutie... 🫠</b>"
+            "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n **You Are Authorized Cutie... 🫠**"
         }
         requests.post(url, data=data)
 
