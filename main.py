@@ -148,6 +148,81 @@ async def remove_auth_user(client: Client, message: Message):
     except (IndexError, ValueError):
         await message.reply_text("**Please provide a valid user ID.**")
 
+@bot.on_message(filters.command("broadcast") & filters.private)
+async def broadcast_handler(client: Client, message: Message):
+    if message.chat.id != OWNER:
+        return
+    if not message.reply_to_message:
+        await message.reply_text("**Reply to any message (text, photo, video, or file) with /broadcast to send it to all users.**")
+        return
+    success = 0
+    fail = 0
+    for user_id in list(set(TOTAL_USERS)):
+        try:
+            # Text
+            if message.reply_to_message.text:
+                await client.send_message(user_id, message.reply_to_message.text)
+            # Photo
+            elif message.reply_to_message.photo:
+                await client.send_photo(
+                    user_id,
+                    photo=message.reply_to_message.photo.file_id,
+                    caption=message.reply_to_message.caption or ""
+                )
+            # Video
+            elif message.reply_to_message.video:
+                await client.send_video(
+                    user_id,
+                    video=message.reply_to_message.video.file_id,
+                    caption=message.reply_to_message.caption or ""
+                )
+            # Document
+            elif message.reply_to_message.document:
+                await client.send_document(
+                    user_id,
+                    document=message.reply_to_message.document.file_id,
+                    caption=message.reply_to_message.caption or ""
+                )
+            else:
+                await client.forward_messages(user_id, message.chat.id, message.reply_to_message.message_id)
+
+            success += 1
+        except (FloodWait, PeerIdInvalid, UserIsBlocked, InputUserDeactivated):
+            fail += 1
+            continue
+        except Exception as e:
+            fail += 1
+            continue
+
+    await message.reply_text(f"<b>Broadcast complete!</b>\n<blockquote><b>✅ Success: {success}\n❎ Failed: {fail}</b></blockquote>")
+
+@bot.on_message(filters.command("broadusers") & filters.private)
+async def broadusers_handler(client: Client, message: Message):
+    if message.chat.id != OWNER:
+        return
+
+    if not TOTAL_USERS:
+        await message.reply_text("**No Broadcasted User**")
+        return
+
+    user_infos = []
+    for user_id in list(set(TOTAL_USERS)):
+        try:
+            user = await client.get_users(int(user_id))
+            fname = user.first_name if user.first_name else " "
+            user_infos.append(f"[{user.id}](tg://openmessage?user_id={user.id}) | `{fname}`")
+        except Exception:
+            user_infos.append(f"[{user.id}](tg://openmessage?user_id={user.id})")
+
+    total = len(user_infos)
+    text = (
+        f"<blockquote><b>Total Users: {total}</b></blockquote>\n\n"
+        "<b>Users List:</b>\n"
+        + "\n".join(user_infos)
+    )
+    await message.reply_text(text)
+    
+
 @bot.on_message(filters.command("users") & filters.private)
 async def list_auth_users(client: Client, message: Message):
     if message.chat.id != OWNER:
@@ -344,12 +419,14 @@ async def youtube_to_txt(client, message: Message):
 
 
 m_file_path= "main.py"
+
 @bot.on_message(filters.command("getcookies") & filters.private)
 async def getcookies_handler(client: Client, m: Message):
     try:
         await client.send_document(chat_id=m.chat.id, document=cookies_file_path, caption="Here is the `youtube_cookies.txt` file.")
     except Exception as e:
         await m.reply_text(f"**Failed Reason:\n<blockquote>{str(e)}</blockquote>**")     
+
 @bot.on_message(filters.command("mfile") & filters.private)
 async def getcookies_handler(client: Client, m: Message):
     try:
@@ -411,6 +488,7 @@ async def txt_handler(bot: Client, m: Message):
         except:
             pass
 
+m_file_path= "main.py"
 
 @bot.on_message(filters.command(["ytm"]))
 async def txt_handler(bot: Client, m: Message):
@@ -485,7 +563,7 @@ async def txt_handler(bot: Client, m: Message):
     elif input.text:
         links = [
             line.strip()
-            for line in input.text.split("\n")
+            for line in input.text.split("\n"):
             if line.strip().startswith(("https://www.youtube.com", "https://youtu.be"))
         ]
         if not links:
@@ -1530,7 +1608,7 @@ def notify_owner():
     for user_id in all_users:
         data = {
             "chat_id": user_id,
-            "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n You Are Authorized Cutie... 🫠"
+            "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n Hehe"
         }
         requests.post(url, data=data)
 
