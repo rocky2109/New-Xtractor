@@ -411,71 +411,160 @@ async def txt_handler(bot: Client, m: Message):
         except:
             pass
 
-    elif input.text:
-        links = [line.strip() for line in input.text.splitlines() if line.strip().startswith("http")]
-        arg = 1
-        count = 1
+
+@bot.on_message(filters.command(["ytm"]))
+async def txt_handler(bot: Client, m: Message):
+    global processing_request, cancel_requested
+    processing_request = True
+    cancel_requested = False
+
+    editable = await m.reply_text(
+        "__**Input Type**__\n\n"
+        "<blockquote><b>01 • Send a .txt file containing YouTube links\n"
+        "02 • Or send single/multiple YouTube links directly</b></blockquote>"
+    )
+
+    input: Message = await bot.listen(editable.chat.id)
+
+    # Handle .txt file input
+    if input.document and input.document.file_name.endswith(".txt"):
+        x = await input.download()
+        file_name = os.path.basename(x)
+        playlist_name = file_name.replace("_", " ").replace(".txt", "")
+
+        try:
+            with open(x, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+
+            # Only extract valid YouTube links
+            links = [
+                line.strip()
+                for line in lines
+                if line.strip().startswith(("https://www.youtube.com", "https://youtu.be"))
+            ]
+            os.remove(x)
+
+            if not links:
+                await m.reply_text("❌ No valid YouTube links found in the file.")
+                return
+
+        except Exception as e:
+            await m.reply_text(f"**Failed to read file:** `{e}`")
+            os.remove(x)
+            return
+
+        await editable.edit(
+            f"**• ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ: {len(links)}**\n"
+            "**• sᴇɴᴅ sᴛᴀʀᴛ ᴘᴏsɪᴛɪᴏɴ (e.g., 1, 3, etc.)**"
+        )
+        try:
+            input0: Message = await bot.listen(editable.chat.id, timeout=20)
+            raw_text = input0.text.strip()
+            await input0.delete()
+        except asyncio.TimeoutError:
+            raw_text = "1"
+
         await editable.delete()
-        await input.delete(True)
+        try:
+            arg = int(raw_text)
+        except ValueError:
+            arg = 1
+
+        count = arg
+
+        try:
+            if arg == 1:
+                playlist_message = await m.reply_text(
+                    f"<blockquote><b>⏯️ Playlist : {playlist_name}</b></blockquote>"
+                )
+                await bot.pin_chat_message(m.chat.id, playlist_message.id)
+        except Exception:
+            pass
+
+    # Handle raw text message (non-file)
+    elif input.text:
+        links = [
+            line.strip()
+            for line in input.text.split("\n")
+            if line.strip().startswith(("https://www.youtube.com", "https://youtu.be"))
+        ]
+        if not links:
+            await m.reply_text("❌ No valid YouTube links found in the message.")
+            return
+
+        count = 1
+        arg = 1
+        await editable.delete()
+        await input.delete()
+
     else:
         await m.reply_text("**Invalid input. Send either a .txt file or YouTube links set.**")
         return
 
-    if not links:
-        await m.reply_text("❌ No valid YouTube links found.")
-        return
-
+    # Download section
     try:
         for i in range(arg - 1, len(links)):
             if cancel_requested:
                 await m.reply_text("🚦 **STOPPED** 🚦")
+                processing_request = False
+                cancel_requested = False
                 return
 
-            url = links[i].replace("www.youtube-nocookie.com/embed", "youtu.be")
-
-            # Fetch video title
+            url = links[i]
             try:
                 oembed_url = f"https://www.youtube.com/oembed?url={url}&format=json"
                 response = requests.get(oembed_url)
-                audio_title = response.json().get("title", "YouTube Video").replace("_", " ")
+                audio_title = response.json().get("title", "YouTube Video")
             except Exception:
-                audio_title = f"YouTube_Audio_{i+1}"
+                audio_title = f"YouTube Video {i+1}"
 
-            name = f'{audio_title[:60]} {CREDIT}'
-            name1 = f'{audio_title} {CREDIT}'
+            safe_title = audio_title.replace("_", " ").replace("/", "-")
+            name = f"{safe_title[:60]} {CREDIT}"
+            name1 = f"{safe_title} {CREDIT}"
 
             prog = await m.reply_text(
-                f"<i><b>🎵 Audio Downloading</b></i>\n<blockquote><b>{str(count).zfill(3)}) {name1}</b></blockquote>"
+                f"<i><b>Audio Downloading</b></i>\n"
+                f"<blockquote><b>{str(count).zfill(3)}) {name1}</b></blockquote>"
             )
 
-            cmd = f'yt-dlp -x --audio-format mp3 --cookies {cookies_file_path} "{url}" -o "{name}.mp3"'
-            print(f"▶️ Running command: {cmd}")
+            cmd = f'yt-dlp -x --audio-format mp3 --cookies "{cookies_file_path}" "{url}" -o "{name}.mp3"'
+            print(f"Running command: {cmd}")
             os.system(cmd)
 
             if os.path.exists(f"{name}.mp3"):
-                await prog.delete(True)
+                await prog.delete()
                 try:
                     await bot.send_document(
                         chat_id=m.chat.id,
                         document=f"{name}.mp3",
-                        caption=f'**🎵 Title:** [{str(count).zfill(3)}] - {name1}\n\n🔗 **Link:** {url}\n\n🌟 **By:** {CREDIT}'
+                        caption=(
+                            f"**🎵 Title:** [{str(count).zfill(3)}] - {name1}.mp3\n\n"
+                            f"🔗 **Video link:** {url}\n\n🌟 **Extracted by:** {CREDIT}"
+                        ),
                     )
                     os.remove(f"{name}.mp3")
                     count += 1
                 except Exception as e:
-                    await m.reply_text(f'⚠️ **Failed to Send** ⚠️\n`{e}`\nURL =>> {url}')
+                    await m.reply_text(
+                        f'⚠️ **Send Failed** ⚠️\n`{str(count).zfill(3)} {name1}`\nURL: {url}\n\n`{e}`',
+                        disable_web_page_preview=True,
+                    )
+                    count += 1
             else:
-                await prog.delete(True)
+                await prog.delete()
                 await m.reply_text(
-                    f'⚠️ **Download Failed** ⚠️\n**Name:** {name1}\n**URL:** {url}', disable_web_page_preview=True
+                    f'⚠️ **Download Failed** ⚠️\n`{str(count).zfill(3)} {name1}`\nURL: {url}',
+                    disable_web_page_preview=True,
                 )
                 count += 1
 
     except Exception as e:
-        await m.reply_text(f"<b>❌ Failed Reason:</b>\n<blockquote><b>{str(e)}</b></blockquote>")
-
+        await m.reply_text(f"<b>Failed Reason:</b>\n<blockquote><b>{str(e)}</b></blockquote>")
     finally:
-        await m.reply_text("✅ <b>All YouTube Music Processed</b>")
+        await m.reply_text("✅ <b>All YouTube Music Processed.</b>")
+        processing_request = False
+        cancel_requested = False
+
 
 m_file_path= "main.py"
 
