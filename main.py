@@ -797,7 +797,7 @@ async def txt_handler(bot: Client, m: Message):
 
     try:
         if raw_text == "1":
-            batch_message = await m.reply_text(f"<blockquote><b>💎 𝐁𝐚𝐭𝐜𝐡 : 𖣐 {b_name} ⚝</b></blockquote>")
+            batch_message = await m.reply_text(f"<blockquote>💎 𝐁𝐚𝐭𝐜𝐡 : 𖣐 <b>{b_name} ⚝</b></blockquote>")
             await bot.pin_chat_message(m.chat.id, batch_message.id)
             message_id = batch_message.id
             pinning_message_id = message_id + 1
@@ -814,7 +814,7 @@ async def txt_handler(bot: Client, m: Message):
             url = "https://" + Vxy
             link0 = "https://" + Vxy
 
-            name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").replace(" vip", "⚝" ).strip()
+            name1 = links[i][0].replace("(", "[").replace(")", "] ").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").replace(" vip", "⚝" ).strip()
             name = f'⚝ {name1[:90]}'
 
             
@@ -908,7 +908,7 @@ async def txt_handler(bot: Client, m: Message):
 
                 cc1 = (
                     f"**╭━━━━━━━━━━━╮**\n"
-                    f"**📄 𝐏𝐃𝐅 𝐈𝐃 : {str(count).zfill(3)}**\n"
+                    f"**📙 𝐏𝐃𝐅 𝐈𝐃 : {str(count).zfill(3)}**\n"
                     f"**╰━━━━━━━━━━━╯**\n\n"
                     f"📁 <b>Tɪᴛʟᴇ: {name1} 𝗖𝗛𝗢𝗦𝗘𝗡 𝗢𝗡𝗘 ⚝.pdf</b>\n\n"
                     f">💎 <b>𝐂ⱺᴜʀꜱᴇ:</b> {b_name}\n\n"
@@ -1053,8 +1053,8 @@ async def txt_handler(bot: Client, m: Message):
                            f"┣🔗𝐈𝐧𝐝𝐞𝐱 » {count}/{len(links)}\n┃\n" \
                            f"╰━🖇️𝐑𝐞𝐦𝐚𝐢𝐧 » {remaining_links}\n" \
                            f"━━━━━━━━━━━━━━━━\n" \
-                           f"<blockquote><b>⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Eɴᴄʀʏᴘᴛᴇᴅ Sᴛᴀʀᴛᴇᴅ...⏳</b></blockquote>\n┃\n" \
-                           f'┣🪄𝐂𝐫𝐞𝐝𝐢𝐭 » {CR}\n┃\n' \
+                           f"<blockquote><b>⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Sᴛᴀʀᴛᴇᴅ...⏳</b></blockquote>\n┃\n" \
+                           f'┣🪄𝐂𝐫𝐞𝐝𝐢𝐭 » <b>@CHOSEN_ONEx ⚝</b>\n┃\n' \
                            f"╰━💎𝐁𝐚𝐭𝐜𝐡 » {b_name}\n" \
                            f"━━━━━━━━━━━━━━━━━\n" \
                            f"<blockquote>📚𝐓𝐢𝐭𝐥𝐞 » {name}</blockquote>\n┃\n" \
@@ -1080,8 +1080,8 @@ async def txt_handler(bot: Client, m: Message):
                            f"┣🔗𝐈𝐧𝐝𝐞𝐱 » {count}/{len(links)}\n┃\n" \
                            f"╰━🖇️𝐑𝐞𝐦𝐚𝐢𝐧 » {remaining_links}\n" \
                            f"━━━━━━━━━━━━━━━━━\n" \
-                           f"<blockquote><b>⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Eɴᴄʀʏᴘᴛᴇᴅ Sᴛᴀʀᴛᴇᴅ...⏳</b></blockquote>\n┃\n" \
-                           f'┣🪄𝐂𝐫𝐞𝐝𝐢𝐭 » {CR}\n┃\n' \
+                           f"<blockquote><b>⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Sᴛᴀʀᴛᴇᴅ...⏳</b></blockquote>\n┃\n" \
+                           f'┣🪄𝐂𝐫𝐞𝐝𝐢𝐭 » <b>@CHOSEN_ONEx ⚝</b>\n┃\n' \
                            f"╰━💎𝐁𝐚𝐭𝐜𝐡 » {b_name}\n" \
                            f"━━━━━━━━━━━━━━━━━\n" \
                            f"<blockquote>📚𝐓𝐢𝐭𝐥𝐞 » {name}</blockquote>\n┃\n" \
@@ -1107,7 +1107,7 @@ async def txt_handler(bot: Client, m: Message):
                            f"┣🔗𝐈𝐧𝐝𝐞𝐱 » {count}/{len(links)}\n┃\n" \
                            f"╰━🖇️𝐑𝐞𝐦𝐚𝐢𝐧 » {remaining_links}\n" \
                            f"━━━━━━━━━━━━━━━━━━━━\n" \
-                           f"<blockquote><b>⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Eɴᴄʀʏᴘᴛᴇᴅ Sᴛᴀʀᴛᴇᴅ...⏳</b></blockquote>\n┃\n" \
+                           f"<blockquote><b>⚡Dᴏᴡɴʟᴏᴀᴅɪɴɢ Sᴛᴀʀᴛᴇᴅ...⏳</b></blockquote>\n┃\n" \
                            f'┣🪄𝐂𝐫𝐞𝐝𝐢𝐭 » {CR}\n┃\n' \
                            f"╰━💎𝐁𝐚𝐭𝐜𝐡 » {b_name}\n" \
                            f"━━━━━━━━━━━━━━━━━━━━━\n" \
