@@ -563,7 +563,7 @@ async def txt_handler(bot: Client, m: Message):
     elif input.text:
         links = [
             line.strip()
-            for line in input.text.split("\n"):
+            for line in input.text.split("\n")
             if line.strip().startswith(("https://www.youtube.com", "https://youtu.be"))
         ]
         if not links:
