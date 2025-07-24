@@ -434,85 +434,80 @@ async def getcookies_handler(client: Client, m: Message):
         await m.reply_text(f"**Failed Reason:\n<blockquote>{str(e)}</blockquote>**")
 
 
-@bot.on_message(filters.command(["ytm"]))
-async def txt_handler(bot: Client, m: Message):
-    global processing_request, cancel_requested
-    processing_request = True
-    cancel_requested = False
-
-    editable = await m.reply_text(
-        "__**Input Type**__\n\n"
-        "<blockquote><b>01 • Send a .txt file containing YouTube links\n"
-        "02 • Or send single/multiple YouTube links directly</b></blockquote>"
-    )
-
-    input: Message = await bot.listen(editable.chat.id)
-
-    # Handle .txt file input
-    if input.document and input.document.file_name.endswith(".txt"):
-        x = await input.download()
-        file_name = os.path.basename(x)
-        playlist_name = file_name.replace("_", " ").replace(".txt", "")
-
+@bot.on_message(filters.command("broadcast") & filters.private)
+async def broadcast_handler(client: Client, message: Message):
+    if message.chat.id != OWNER:
+        return
+    if not message.reply_to_message:
+        await message.reply_text("**Reply to any message (text, photo, video, or file) with /broadcast to send it to all users.**")
+        return
+    success = 0
+    fail = 0
+    for user_id in list(set(TOTAL_USERS)):
         try:
-            with open(x, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-
-            # Only extract valid YouTube links
-            links = [
-                line.strip()
-                for line in lines
-                if line.strip().startswith(("https://www.youtube.com", "https://youtu.be"))
-            ]
-            os.remove(x)
-
-            if not links:
-                await m.reply_text("❌ No valid YouTube links found in the file.")
-                return
-
-        except Exception as e:
-            await m.reply_text(f"**Failed to read file:** `{e}`")
-            os.remove(x)
-            return
-
-        await editable.edit(
-            f"**• ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ: {len(links)}**\n"
-            "**• sᴇɴᴅ sᴛᴀʀᴛ ᴘᴏsɪᴛɪᴏɴ (e.g., 1, 3, etc.)**"
-        )
-        try:
-            input0: Message = await bot.listen(editable.chat.id, timeout=20)
-            raw_text = input0.text.strip()
-            await input0.delete()
-        except asyncio.TimeoutError:
-            raw_text = "1"
-
-        await editable.delete()
-        try:
-            arg = int(raw_text)
-        except ValueError:
-            arg = 1
-
-        count = arg
-
-        try:
-            if arg == 1:
-                playlist_message = await m.reply_text(
-                    f"<blockquote><b>🎶 Playlist : {playlist_name}</b></blockquote>"
+            # Text
+            if message.reply_to_message.text:
+                await client.send_message(user_id, message.reply_to_message.text)
+            # Photo
+            elif message.reply_to_message.photo:
+                await client.send_photo(
+                    user_id,
+                    photo=message.reply_to_message.photo.file_id,
+                    caption=message.reply_to_message.caption or ""
                 )
-                await bot.pin_chat_message(m.chat.id, playlist_message.id)
-        except Exception:
-            pass
+            # Video
+            elif message.reply_to_message.video:
+                await client.send_video(
+                    user_id,
+                    video=message.reply_to_message.video.file_id,
+                    caption=message.reply_to_message.caption or ""
+                )
+            # Document
+            elif message.reply_to_message.document:
+                await client.send_document(
+                    user_id,
+                    document=message.reply_to_message.document.file_id,
+                    caption=message.reply_to_message.caption or ""
+                )
+            else:
+                await client.forward_messages(user_id, message.chat.id, message.reply_to_message.message_id)
 
-    # Handle raw text message (non-file)
-    elif input.text:
-        links = [
-            line.strip()
-            for line in input.text.split("\n")
-            if line.strip().startswith(("https://www.youtube.com", "https://youtu.be"))
-        ]
-        if not links:
-            await m.reply_text("❌ No valid YouTube links found in the message.")
-            return
+            success += 1
+        except (FloodWait, PeerIdInvalid, UserIsBlocked, InputUserDeactivated):
+            fail += 1
+            continue
+        except Exception as e:
+            fail += 1
+            continue
+
+    await message.reply_text(f"<b>Broadcast complete!</b>\n<blockquote><b>✅ Success: {success}\n❎ Failed: {fail}</b></blockquote>")
+
+@bot.on_message(filters.command("broadusers") & filters.private)
+async def broadusers_handler(client: Client, message: Message):
+    if message.chat.id != OWNER:
+        return
+
+    if not TOTAL_USERS:
+        await message.reply_text("**No Broadcasted User**")
+        return
+
+    user_infos = []
+    for user_id in list(set(TOTAL_USERS)):
+        try:
+            user = await client.get_users(int(user_id))
+            fname = user.first_name if user.first_name else " "
+            user_infos.append(f"[{user.id}](tg://openmessage?user_id={user.id}) | `{fname}`")
+        except Exception:
+            user_infos.append(f"[{user.id}](tg://openmessage?user_id={user.id})")
+
+    total = len(user_infos)
+    text = (
+        f"<blockquote><b>Total Users: {total}</b></blockquote>\n\n"
+        "<b>Users List:</b>\n"
+        + "\n".join(user_infos)
+    )
+    await message.reply_text(text)
+    
 @bot.on_message(filters.command(["ytm"]))
 async def txt_handler(bot: Client, m: Message):
     global processing_request, cancel_requested, cancel_message
@@ -660,6 +655,15 @@ async def yt2m_handler(bot: Client, m: Message):
 async def stop_handler(_, m: Message):
     await m.reply_text(">😘 𝗦𝘁𝗼𝗽𝗽𝗲𝗱 𝗕𝗮𝗯𝘆 😉", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
+
+
+@bot.on_message(filters.command(["reset"]) )
+async def restart_handler(_, m):
+    if m.chat.id != OWNER:
+        return
+    else:
+        await m.reply_text("𝐁𝐨𝐭 𝐢𝐬 𝐑𝐞𝐬𝐞𝐭𝐢𝐧𝐠...", True)
+        os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 @bot.on_message(filters.command("start") & (filters.private | filters.group | filters.channel))
@@ -811,8 +815,8 @@ async def txt_handler(bot: Client, m: Message):
         await m.reply_text(f"<blockquote>❌ You are not authorized to use this command. I just follow my Boss commands only 🫠</blockquote>\n")
         return
     editable = await m.reply_text(
-        "**All Set Sir 🫡**\n"
-        "<blockquote><b>Just Send Me txt File & I will handle it automatically until it's done 😊</b></blockquote>"
+        "**All Set 🫡**\n"
+        "<blockquote><b>Just Send Me txt File & I will handle it automatically until it's done 😉</b></blockquote>"
     )
     input: Message = await bot.listen(editable.chat.id)
     x = await input.download()
@@ -860,7 +864,7 @@ async def txt_handler(bot: Client, m: Message):
     
     if int(raw_text) > len(links) :
         await editable.edit(f"**🔹Enter number in range of Index**")
-        processing_request = False  # Reset the processing flag
+        processing_request = Fals# Reset the processing flag
         await m.reply_text("**🔹Exiting Task......  **")
         return
     
@@ -885,7 +889,7 @@ async def txt_handler(bot: Client, m: Message):
         raw_text2 = input2.text
         await input2.delete(True)
     except asyncio.TimeoutError:
-        raw_text2 = '720'
+        raw_text2 = '480'
     quality = f"{raw_text2}p"
     try:
         if raw_text2 == "144":
@@ -918,7 +922,7 @@ async def txt_handler(bot: Client, m: Message):
     else:
         CR = raw_text3
 
-    await editable.edit("**🔹Enter __PW/CP/CW__ Working Token or send /d**")
+    await editable.edit("**🌚 /d 🌝**")
     try:
         input4: Message = await bot.listen(editable.chat.id, timeout=30)
         raw_text4 = input4.text
@@ -1366,14 +1370,14 @@ async def text_handler(bot: Client, m: Message):
 
             elif "https://cpvod.testbook.com/" in url:
                 url = url.replace("https://cpvod.testbook.com/","https://media-cdn.classplusapp.com/drm/")
-                url = 'https://dragoapi.vercel.app/classplus?link=' + url
+                url = f"https://cpapi-rjbs.onrender.com/extract_keys?url={url}@bots_updatee"
                 mpd, keys = helper.get_mps_and_keys(url)
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
             elif "classplusapp.com/drm/" in url:
                 url = f"https://drmapijion-botupdatevip.vercel.app/api?url={url}&token={raw_text4}"
-                #url = 'https://dragoapi.vercel.app/classplus?link=' + url
+                url = f"https://cpapi-rjbs.onrender.com/extract_keys?url={url}@bots_updatee"
                 mpd, keys = helper.get_mps_and_keys(url)
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
@@ -1385,20 +1389,11 @@ async def text_handler(bot: Client, m: Message):
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
 
-            elif "classplusapp.com/drm/" in url:
-                url = f"https://drmapijion-botupdatevip.vercel.app/api?url={url}&token={raw_text4}"
-
-                if ".mpd" in url:
-                    mpd = url
-        # process DASH stream here
-                    keys_string = " ".join([f"--key {key}" for key in keys])
-        # Example: await download_dash(mpd, keys_string)
-
-                elif ".m3u8" in url:
-                    m3u8 = url
-        # process HLS stream here
-                    keys_string = " ".join([f"--key {key}" for key in keys])
-        # Example: await download_hls(m3u8, keys_string)
+            elif "classplusapp" in url:
+                signed_api = f"https://cpapi-rjbs.onrender.com/extract_keys?url={url}@bots_updatee"
+                response = requests.get(signed_api, timeout=20)
+                #url = response.text.strip()
+                url = response.json()['url']  
 
 
             elif "tencdn.classplusapp" in url:
@@ -1591,7 +1586,7 @@ def notify_owner():
     for user_id in all_users:
         data = {
             "chat_id": user_id,
-            "text": "𝐁𝐨𝐭 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n Hehe"
+            "text": "𝐁𝐨𝐭 𝐔𝐩𝐝𝐚𝐭𝐞𝐝 & 𝐑𝐞𝐬𝐭𝐚𝐫𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐮𝐥𝐥𝐲 ✅\n\n Hehe"
         }
         requests.post(url, data=data)
 
