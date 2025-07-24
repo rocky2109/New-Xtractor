@@ -871,7 +871,7 @@ async def txt_handler(bot: Client, m: Message):
     
     await editable.edit(f"**🔹Enter Batch Name or send /d for use default**")
     try:
-        input1: Message = await bot.listen(editable.chat.id, timeout=30)
+        input1: Message = await bot.listen(editable.chat.id, timeout=10)
         raw_text0 = input1.text
         await input1.delete(True)
     except asyncio.TimeoutError:
@@ -911,7 +911,7 @@ async def txt_handler(bot: Client, m: Message):
 
     await editable.edit(f"** Enter Your Name or send /d for use default sir**")
     try:
-        input3: Message = await bot.listen(editable.chat.id, timeout=10)
+        input3: Message = await bot.listen(editable.chat.id, timeout=5)
         raw_text3 = input3.text
         await input3.delete(True)
     except asyncio.TimeoutError:
@@ -924,7 +924,7 @@ async def txt_handler(bot: Client, m: Message):
 
     await editable.edit("**🌚 /d 🌝**")
     try:
-        input4: Message = await bot.listen(editable.chat.id, timeout=30)
+        input4: Message = await bot.listen(editable.chat.id, timeout=60)
         raw_text4 = input4.text
         await input4.delete(True)
     except asyncio.TimeoutError:
