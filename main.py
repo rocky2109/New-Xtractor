@@ -864,7 +864,7 @@ async def txt_handler(bot: Client, m: Message):
     
     if int(raw_text) > len(links) :
         await editable.edit(f"**🔹Enter number in range of Index**")
-        processing_request = Fals# Reset the processing flag
+        processing_request = False # Reset the processing flag
         await m.reply_text("**🔹Exiting Task......  **")
         return
     
