@@ -419,55 +419,6 @@ async def youtube_to_txt(client, message: Message):
     # Remove the temporary text file after sending
     os.remove(txt_file)
 
-    
-@bot.on_message(filters.command(["ytm"]))
-async def txt_handler(bot: Client, m: Message):
-    global processing_request, cancel_requested, cancel_message
-    processing_request = True
-    cancel_requested = False
-    editable = await m.reply_text("__**Input Type**__\n\n<blockquote><b>01 •Send me the .txt file containing YouTube links\n02 •Send Single link or Set of YouTube multiple links</b></blockquote>")
-    input: Message = await bot.listen(editable.chat.id)
-    if input.document and input.document.file_name.endswith(".txt"):
-        x = await input.download()
-        file_name, ext = os.path.splitext(os.path.basename(x))
-        playlist_name = file_name.replace('_', ' ')
-        try:
-            with open(x, "r") as f:
-                content = f.read()
-            content = content.split("\n")
-            links = []
-            for i in content:
-                links.append(i.split("://", 1))
-            os.remove(x)
-        except:
-             await m.reply_text("**Invalid file input.**")
-             os.remove(x)
-             return
-
-        await editable.edit(f"**•ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ ᴀʀᴇ --__{len(links)}__--\n•sᴇɴᴅ ғʀᴏᴍ ᴡʜᴇʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ**")
-        try:
-            input0: Message = await bot.listen(editable.chat.id, timeout=20)
-            raw_text = input0.text
-            await input0.delete(True)
-        except asyncio.TimeoutError:
-            raw_text = '1'
-        
-        await editable.delete()
-        arg = int(raw_text)
-        count = int(raw_text)
-        try:
-            if raw_text == "1":
-                playlist_message = await m.reply_text(f"<blockquote><b>⏯️Playlist : {playlist_name}</b></blockquote>")
-                await bot.pin_chat_message(m.chat.id, playlist_message.id)
-                message_id = playlist_message.id
-                pinning_message_id = message_id + 1
-                await bot.delete_messages(m.chat.id, pinning_message_id)
-        except Exception as e:
-            None
-    
-    elif input.text:
-
-
 @bot.on_message(filters.command(["ytm"]))
 async def txt_handler(bot: Client, m: Message):
     global processing_request, cancel_requested, cancel_message
