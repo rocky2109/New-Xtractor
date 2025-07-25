@@ -938,6 +938,14 @@ async def txt_handler(bot: Client, m: Message):
         cwtoken = raw_text4
         cptoken = raw_text4
         pwtoken = raw_text4
+
+    await editable.edit("**If you want to topic wise uploader : send `yes` or send /d**\n\n<blockquote><b>Topic fetch from (bracket) in title</b></blockquote>")
+    try:
+        input5: Message = await bot.listen(editable.chat.id, timeout=20)
+        raw_text5 = input5.text
+        await input5.delete(True)
+    except asyncio.TimeoutError:
+        raw_text5 = '/d'    
         
     await editable.edit(f"**🔹Send the Video Thumb URL or send /d for use default**")
     try:
