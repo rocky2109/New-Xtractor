@@ -419,81 +419,7 @@ async def youtube_to_txt(client, message: Message):
     # Remove the temporary text file after sending
     os.remove(txt_file)
 
-@bot.on_message(filters.command(["ytm"]))
-async def txt_handler(bot: Client, m: Message):
-    global processing_request, cancel_requested, cancel_message
-    processing_request = True
-    cancel_requested = False
 
-    editable = await m.reply_text(
-        "__**Input Type**__\n\n<blockquote><b>01 •Send me the .txt file containing YouTube links\n02 •Send Single link or Set of YouTube multiple links</b></blockquote>"
-    )
-
-    input: Message = await bot.listen(editable.chat.id)
-
-    # Function to sanitize filenames
-    def sanitize_filename(name: str) -> str:
-        return re.sub(r'[\\/*?:"<>|]', '', name).strip().replace("  ", " ")
-
-    links = []
-    playlist_name = "YouTube Playlist"
-    if input.document and input.document.file_name.endswith(".txt"):
-        try:
-            x = await input.download()
-            file_name, _ = os.path.splitext(os.path.basename(x))
-            playlist_name = file_name.replace('_', ' ')
-
-            with open(x, "r", encoding='utf-8') as f:
-                content = f.read().strip().splitlines()
-
-            for i in content:
-                parts = i.strip().split("://", 1)
-                if len(parts) == 2:
-                    links.append(parts)
-
-            os.remove(x)
-
-        except Exception as e:
-            await m.reply_text(f"**Invalid file input.**\nError: {e}")
-            if os.path.exists(x):
-                os.remove(x)
-            return
-
-        if not links:
-            await m.reply_text("**No valid YouTube links found in file.**")
-            return
-
-        await editable.edit(
-            f"**•ᴛᴏᴛᴀʟ 🔗 ʟɪɴᴋs ғᴏᴜɴᴅ: __{len(links)}__**\n•sᴇɴᴅ sᴛᴀʀᴛ ɪɴᴅᴇx ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ғʀᴏᴍ (e.g., 1)"
-        )
-
-        try:
-            input0: Message = await bot.listen(editable.chat.id, timeout=20)
-            start_index = int(input0.text.strip())
-            await input0.delete()
-        except Exception:
-            start_index = 1
-
-        await editable.delete()
-
-        try:
-            playlist_message = await m.reply_text(f"<blockquote><b>⏯️Playlist : {playlist_name}</b></blockquote>")
-            await bot.pin_chat_message(m.chat.id, playlist_message.id)
-        except Exception:
-            pass
-
-    elif input.text:
-        content = input.text.strip().splitlines()
-        for i in content:
-            parts = i.strip().split("://", 1)
-            if len(parts) == 2:
-                links.append(parts)
-        start_index = 1
-        await editable.delete()
-        await input.delete()
-    else:
-        await m.reply_text("**Invalid input. Send either a .txt file or YouTube links set**")
-        
 @bot.on_message(filters.command(["ytm"]))
 async def txt_handler(bot: Client, m: Message):
     global processing_request, cancel_requested, cancel_message
@@ -578,7 +504,7 @@ async def txt_handler(bot: Client, m: Message):
                     await prog.delete(True)
                     print(f"File {name}.mp3 exists, attempting to send...")
                     try:
-                        await bot.send_document(chat_id=m.chat.id, document=f'{name}.mp3', caption=f'**🎵 Title : **[{str(count).zfill(3)}] - {name1}.mp3\n\n🔗**Video link** : {url}\n\n🌟** Extracted By** : {CREDIT}')
+                        await bot.send_document(chat_id=m.chat.id, document=f'{name1}.mp3', caption=f'**🎵 Title : **[{str(count).zfill(3)}] - {name1}.mp3\n\n🔗**Video link** : {url}\n\n🌟** Extracted By** : {CREDIT}')
                         os.remove(f'{name}.mp3')
                         count+=1
                     except Exception as e:
